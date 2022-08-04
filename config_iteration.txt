@@ -1,0 +1,15 @@
+Value                                                   % Discription
+10000                                                    % Max Iteration Number
+1000                                                    % Save Results period
+0.9                                                     % Alpha for object updata
+11                                                      % Probe update start run
+0.5                                                     % Beta for probe update
+1                                                       % Real space constriant start run
+0.1                                                     % Real space constriant factor
+5000                                                     % Position correction strat run
+100                                                      % Position correction peroid
+13                                                       % Position correction points
+100                                                     % Position correction range (nm)
+0.05                                                    % Probe deny area factor
+0                                                       % probe deny reducing ratio
+1                                                       % Draw results

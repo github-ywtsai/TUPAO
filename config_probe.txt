@@ -1,0 +1,10 @@
+Value                                       % Description
+2E2                                         % photon flux / sec
+5                                           % Mixture statue of probe
+G                                           % Probe genarate method (G: Gaussian, Z: ZonePlate, A:Adapt from another result)
+0.4                                         % (Gaussian) Ver. beamsize [um]
+0.4                                         % (Gaussian) Ver. beamsize [um]
+1                                           % (Gaussian) Broken profile (1: yes, 0: no)
+/home/tsai.yw/gpfs_folder/raw data/20220603_zp_pty/20_DL/HR/SN1652_Run5000.mat % (Adapt) Section File Path
+All                                         % (Adapt) mixture-state mode index for adapting (All for sum up all mode)
+0                                           % Adapt position corr. from section file

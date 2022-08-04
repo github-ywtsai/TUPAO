@@ -1,0 +1,21 @@
+Value                                                  % Discription
+/home/tsai.yw/gpfs_folder/raw data/20220603_zp_pty/   % the folder of the master file
+84b18f21-5396-400d-9293_52_master.h5                     % the file nmae of the master file
+/home/tsai.yw/gpfs_folder/raw data/20220603_zp_pty/    % the folder of the mask files
+mask.csv                                               % the file name of the csv mask file (None for skipping)
+None                                                   % the file name of the csv mask file (None for skipping)        
+None                                                   % the file name of the csv mask file (None for skipping)
+None                                                   % the file name of the csv mask file (None for skipping)
+/home/tsai.yw/gpfs_folder/raw data/20220603_zp_pty/    % the folder of the scan position file
+Range2Step50ScanPos.txt                                % the file name of the scan position file
+/home/tsai.yw/gpfs_folder/raw data/20220603_zp_pty/52/test  % the folder for saving section file
+Auto                                                   % beam center X (Auto for loading from the header in the master file)
+Auto                                                   % beam center Y (Auto for loading from the header in the master file)
+Auto                                                   % wavelength [A] (Auto for loading from the header in the master file)
+Auto                                                   % Sample to detector distance [m] (Auto for loading from the header in the master file)
+Auto                                                   % Detector X pixel size [um] (Auto for loading from the header in the master file)
+Auto                                                   % Detector Y pixel size [um] (Auto for loading from the header in the master file)
+500                                                   % Data clipping size
+1                                                      % arrage GPU device number (None for skipping)
+1                                                      % probe extending factor
+None                                                       % seed for random (None for random seed)
