@@ -1,4 +1,4 @@
-function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)
+function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)
     
     
     object = object_info.real_space;
@@ -75,10 +75,12 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         oMax = max( sum(abs(clip_object).^2,3),[],'all');
         upper_term = conj(clip_object).* diff_psi_p_psi;
         lower_term = (1-iteration_para.beta_current)*abs(clip_object).^2 + iteration_para.beta_current*oMax;
-        probe = probe + upper_term./lower_term;
+        if iteration_para.beta_current ~= 0
+            probe = probe + upper_term./lower_term;
         %first_term = iteration_para.beta_current / max(max( sum(abs(clip_object).^2,3))); % ePIE
         %second_term = conj(clip_object).* diff_psi_p_psi; % ePIE
         %probe = probe + first_term * second_term; % ePIE
+        end
         
         if iteration_para.probe_deny_reducing_ratio ~= 0
             probe = probe.*probe_deny_mask;
