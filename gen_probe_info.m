@@ -99,7 +99,9 @@ function probe_temp = generate_probe_from_Gaussian(ProbeConf)
         Temp = zeros(ProbeConf.clip_size);
         Temp(Seed) = 1;
         Temp = conv2(Temp,Speckle,'same');
-        probe_temp = probe_temp.*Temp.*exp(1i*Temp);
+        % probe_temp = probe_temp.*Temp.*exp(1i*Temp); % break amp and
+        % phase
+        probe_temp = probe_temp.*exp(1i*Temp); % only break phase
     end
 end
 
