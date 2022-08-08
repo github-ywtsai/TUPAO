@@ -1,4 +1,4 @@
-function output = propagate_probe(z,probe_info)
+function propagated_probe_info = propagate_probe(z,probe_info)
     % 20220727
     % fix wrong useing of fft2 cause in incorrect phase information
     % worng usage: fft2(A)
@@ -49,11 +49,16 @@ function output = propagate_probe(z,probe_info)
         U_propagated(:,:,ModeSN) = exp(1i*k*z)/(1i*lambda*z)*exp(1i*k/(2*z)*(lambda*z)^2*(xp.^2+yp.^2)).*fft_temp;
     end
     
-    output.propagated_probe = U_propagated;
-    output.x_axis = xp_axis;
-    output.y_axis = yp_axis;
-    output.x_res = xp_res;
-    output.y_res = yp_res;
-    output.propagating_distance = z; 
+    propagated_probe_info.ProbeConf = probe_info.ProbeConf;
+    propagated_probe_info.real_space = U_propagated;
+    propagated_probe_info.real_space_xaxis = xp_axis;
+    propagated_probe_info.real_space_yaxis = yp_axis;
+    propagated_probe_info.pos_correct_pixel = probe_info.pos_correct_pixel;
+    propagated_probe_info.x_res = xp_res;
+    propagated_probe_info.y_res = yp_res;
+    propagated_probe_info.Mp = probe_info.Mp;
+    propagated_probe_info.photon_flux = probe_info.photon_flux;
+    propagated_probe_info.wavelength = probe_info.wavelength;
+    propagated_probe_info.propagating_distance = z;
 
 end
