@@ -250,6 +250,11 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     ProbeConf.AdaptProbeMode = Value{8};
     ProbeConf.AdapPosCorr = logical(Value{9});
     
+    %% probe upstream constrain
+    ProbeConf.UpStreamConstrain = logical(Value{10});
+    ProbeConf.ApertureDist = Value{11}; % in meter
+    ProbeConf.ApertureSize = Value{12}*1E-6; % from um to meter
+    
     clip_size = init_cond.effective_clip_size;
     n_of_data = init_cond.n_of_data;
     
