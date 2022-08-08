@@ -269,6 +269,7 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     real_space_xaxis = (probe_col_idx(1,:) - real_space_col_cen_idx) * x_res;
     real_space_yaxis = -(probe_row_idx(:,1) - real_space_row_cen_idx) * y_res;
     
+    ProbeConf.wavelength = wavelength;
     ProbeConf.clip_size = clip_size;
     ProbeConf.n_of_data = n_of_data;
     ProbeConf.x_res = x_res;
@@ -279,4 +280,5 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     ProbeConf.probe_col_idx = probe_col_idx;
     ProbeConf.real_space_xaxis = real_space_xaxis;
     ProbeConf.real_space_yaxis = real_space_yaxis;
+    
 end
