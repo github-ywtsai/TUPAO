@@ -194,6 +194,9 @@ function init_cond = get_config(ConfigFP)
         init_cond.rand_seed = Value{20};
         rng(init_cond.rand_seed)
     end
+    
+    %% determine core
+    init_cond.core = Value{21};
 end
 
 function ReturnValue = autoload_ExpStat(master_fp,Target)

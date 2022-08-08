@@ -54,9 +54,12 @@ function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,pr
         %% calculating parts
         fprintf('%s_Run %d in progressing...',SectionFilePrefix,CurrentRun);
         tic;       
-        % ePIE
-        
-        [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
+        % ePIE or rPIE
+        if strcmpi(init_cond.core,'e') 
+            [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
+        elseif strcmpi(init_cond.core,'r') 
+            [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
+        end
         [~,n_of_interesting_data] = size(iteration_para.interesting_table);
         iteration_para.chi2(CurrentRun) = chi2_sum/n_of_interesting_data;
         object_info.real_space = updated_object;

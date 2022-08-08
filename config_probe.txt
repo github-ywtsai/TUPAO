@@ -1,5 +1,5 @@
 Value                                       % Description
-2E2                                         % photon flux / sec
+1E2                                         % photon flux / sec
 5                                           % Mixture statue of probe
 G                                           % Probe genarate method (G: Gaussian, Z: ZonePlate, A:Adapt from another result)
 0.4                                         % (Gaussian) Ver. beamsize [um]
