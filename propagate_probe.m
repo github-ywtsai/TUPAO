@@ -1,4 +1,4 @@
-function propagated_probe_info = propagate_probe(z,probe_info)
+function propagated_probe_info = propagate_probe(z,origin_probe_info)
     % 20220727
     % fix wrong useing of fft2 cause in incorrect phase information
     % worng usage: fft2(A)
@@ -8,24 +8,22 @@ function propagated_probe_info = propagate_probe(z,probe_info)
     % in formula, +z means propagating to "downstream" and -z to
     % "upstream". So, when input, +z means "downstream" and to increase the distance from the
     % source coming from the undulator. -z means "upstream" and to decrease
-    % the distace from the source coming from the undulator.
-    % Different mode between fft mode and ifft mode.
 
     % preset parameters
-    lambda = probe_info.wavelength; %[m]
+    lambda = origin_probe_info.wavelength; %[m]
     k = 2*pi/lambda;
-    ModeNum = size(probe_info.real_space,3); 
+    ModeNum = size(origin_probe_info.real_space,3); 
     
-    xi_axis =  probe_info.real_space_xaxis;
-    eta_axis =  probe_info.real_space_yaxis';
+    xi_axis =  origin_probe_info.real_space_xaxis;
+    eta_axis =  origin_probe_info.real_space_yaxis';
     xi_axis_res = abs(xi_axis(2)-xi_axis(1));
     eta_axis_res = abs(eta_axis(2)-eta_axis(1));
     [xi,eta] = meshgrid(xi_axis,eta_axis); %[m]
     
-    [U_measured_eta_size,U_measured_xi_size] = size(probe_info.real_space(:,:,1));
+    [U_measured_eta_size,U_measured_xi_size] = size(origin_probe_info.real_space(:,:,1));
     xp_res = abs(lambda*z/U_measured_xi_size/xi_axis_res);
     yp_res = abs(lambda*z/U_measured_eta_size/eta_axis_res);
-    [U_propagated_yp_size,U_propagated_xp_size] = size(probe_info.real_space(:,:,1));
+    [U_propagated_yp_size,U_propagated_xp_size] = size(origin_probe_info.real_space(:,:,1));
     xp_axis = ((1:U_propagated_xp_size)-round(U_propagated_xp_size/2))*xp_res;
     yp_axis = ((1:U_propagated_yp_size)-round(U_propagated_yp_size/2))*yp_res;
     [xp,yp] = meshgrid(xp_axis,yp_axis);
@@ -34,7 +32,7 @@ function propagated_probe_info = propagate_probe(z,probe_info)
     
     % calculate propagating
     for ModeSN = 1:ModeNum
-        U_measured = probe_info.real_space(:,:,ModeSN);
+        U_measured = origin_probe_info.real_space(:,:,ModeSN);
         if z<0
             U_measured = rot90(U_measured,2);
         end
@@ -49,16 +47,15 @@ function propagated_probe_info = propagate_probe(z,probe_info)
         U_propagated(:,:,ModeSN) = exp(1i*k*z)/(1i*lambda*z)*exp(1i*k/(2*z)*(lambda*z)^2*(xp.^2+yp.^2)).*fft_temp;
     end
     
-    propagated_probe_info.ProbeConf = probe_info.ProbeConf;
+    propagated_probe_info.ProbeConf = origin_probe_info.ProbeConf;
     propagated_probe_info.real_space = U_propagated;
     propagated_probe_info.real_space_xaxis = xp_axis;
     propagated_probe_info.real_space_yaxis = yp_axis;
-    propagated_probe_info.pos_correct_pixel = probe_info.pos_correct_pixel;
+    propagated_probe_info.pos_correct_pixel = origin_probe_info.pos_correct_pixel;
     propagated_probe_info.x_res = xp_res;
     propagated_probe_info.y_res = yp_res;
-    propagated_probe_info.Mp = probe_info.Mp;
-    propagated_probe_info.photon_flux = probe_info.photon_flux;
-    propagated_probe_info.wavelength = probe_info.wavelength;
-    propagated_probe_info.propagating_distance = z;
+    propagated_probe_info.Mp = origin_probe_info.Mp;
+    propagated_probe_info.photon_flux = origin_probe_info.photon_flux;
+    propagated_probe_info.wavelength = origin_probe_info.wavelength;
 
 end
