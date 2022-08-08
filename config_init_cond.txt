@@ -19,4 +19,4 @@ Auto                                                   % Detector Y pixel size [
 1                                                      % arrage GPU device number (None for skipping)
 1                                                      % probe extending factor
 100                                                      % seed for random (None for random seed)
-ePIE                                                      % core: ePIE, rPIE, mPIE, ML, DM
+rPIE                                                      % core: ePIE, rPIE, mPIE, ML, DM
