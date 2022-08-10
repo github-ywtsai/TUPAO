@@ -59,7 +59,7 @@ function updated_pos_correct_pixel = position_correction(measured_amp,init_cond,
             % psi for real space in (S12)
             
             % formula (4)
-            Psi = fftshift(fft2(psi));
+            Psi = fftshift(fft2(ifftshift(psi)));
             % Psi(:,:,k)           
             
             % formula (5), (S11)
