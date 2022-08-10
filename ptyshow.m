@@ -81,7 +81,7 @@ function ptyshow()
     % the direction in yaxis is that the postive direction point to the row
     % 1 (meaning the inverse direction of the row direction)
     x_lim_scaned = sort([obj_xaxis(object_plot_min_col_idx) obj_xaxis(object_plot_max_col_idx)]); % in [um]
-    y_lim_scaned = sort([obj_yaxis(object_plot_min_row_idx) obj_xaxis(object_plot_max_row_idx)]); % in [um]
+    y_lim_scaned = sort([obj_yaxis(object_plot_min_row_idx) obj_yaxis(object_plot_max_row_idx)]); % in [um]
     
     handles.plot_real = imagesc(handles.axes_obj_real,obj_xaxis,obj_yaxis,real(object_info.real_space));
     handles.plot_abs = imagesc(handles.axes_obj_abs,obj_xaxis,obj_yaxis,abs(object_info.real_space));
