@@ -43,7 +43,7 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         % psi for real space in (S12)
         
         % formula (4)
-        Psi = fftshift(fft2(psi));
+        Psi = fftshift(fft2(ifftshift(psi))); % fixed 20220810
         % Psi(:,:,k)        
         
         % formula (5), (S11)
@@ -55,7 +55,7 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         % calculate chi^2
         chi2_temp(1,data_sn) = sum(sum( (Psi_amp_flat -data).^2.*~mask))/active_area;
         clear Psi Psi_amp_flat_non_zero_mask Psi_amp_flat data
-        psi_p = ifft2(ifftshift(Psi_p));
+        psi_p = fftshift(ifft2(ifftshift(Psi_p))); % fixed 20220810
         diff_psi_p_psi = psi_p - psi;
         clear psi_p psi
         % Psi_amp_flat, Psi_p and psi_p are the matrix in [clip_size,clip_size,Mp]
