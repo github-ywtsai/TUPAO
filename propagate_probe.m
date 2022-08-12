@@ -57,7 +57,6 @@ function propagated_probe_info = propagate_probe(z,origin_probe_info)
     propagated_probe_info.x_res = xp_res;
     propagated_probe_info.y_res = yp_res;
     propagated_probe_info.Mp = origin_probe_info.Mp;
-    propagated_probe_info.photon_flux = origin_probe_info.photon_flux;
     propagated_probe_info.wavelength = origin_probe_info.wavelength;
 
 end
