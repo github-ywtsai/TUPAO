@@ -88,9 +88,6 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         %probe = probe + first_term * second_term; % ePIE
         end
         
-        if iteration_para.probe_deny_reducing_ratio ~= 0
-            probe = probe.*probe_deny_mask;
-        end
         clear first_term second_term diff_psi_p_psi
         
         
