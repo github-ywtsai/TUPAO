@@ -45,7 +45,6 @@ function probe_info = gen_probe_info(init_cond,probeconfigFP)
     probe_info.x_res = ProbeConf.x_res;
     probe_info.y_res = ProbeConf.y_res;
     probe_info.Mp = ProbeConf.Mp;
-    probe_info.photon_flux = ProbeConf.photon_flux;
     probe_info.wavelength = init_cond.wavelength;
 
 end
