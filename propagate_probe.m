@@ -44,7 +44,9 @@ function propagated_probe_info = propagate_probe(z,origin_probe_info)
         fft_temp = fftshift(fft2(ifftshift(temp)))*xi_axis_res*eta_axis_res;
         % Above formula is formula with the area normazilation factor.
         % Used after 20201102
-        U_propagated(:,:,ModeSN) = exp(1i*k*z)/(1i*lambda*z)*exp(1i*k/(2*z)*(lambda*z)^2*(xp.^2+yp.^2)).*fft_temp;
+        % U_propagated(:,:,ModeSN) = exp(1i*k*z)/(1i*lambda*z)*exp(1i*k/(2*z)*(lambda*z)^2*(xp.^2+yp.^2)).*fft_temp;
+        U_propagated(:,:,ModeSN) = exp(1i*k*z)/(1i*lambda*z)*exp(1i*k/(2*z)*(xp.^2+yp.^2)).*fft_temp;
+        % fixed phase term 20220812
     end
     
     propagated_probe_info.ProbeConf = origin_probe_info.ProbeConf;
