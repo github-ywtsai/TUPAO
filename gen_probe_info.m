@@ -46,6 +46,7 @@ function probe_info = gen_probe_info(init_cond,probeconfigFP)
     probe_info.y_res = ProbeConf.y_res;
     probe_info.Mp = ProbeConf.Mp;
     probe_info.photon_flux = ProbeConf.photon_flux;
+    probe_info.wavelength = init_cond.wavelength;
 
 end
 
@@ -144,7 +145,6 @@ end
 
 function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     clip_size = init_cond.effective_clip_size;
-    wavelength = init_cond.wavelength;
     detector_distance = init_cond.detector_distance;
     x_pixel_size = init_cond. effective_x_pixel_size;
     y_pixel_size = init_cond. effective_y_pixel_size;
