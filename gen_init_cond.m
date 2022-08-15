@@ -2,7 +2,7 @@ function init_cond = gen_init_cond(ConfigFP)
     init_cond = get_config(ConfigFP);
   
     master_fp = init_cond.master_fp;
-    
+    init_cond.data_precision = 'single'; % single or double
     init_cond.bit_depth_image = double(h5read(master_fp,'/entry/instrument/detector/bit_depth_image'));
     init_cond.bad_point_value = power(2,init_cond.bit_depth_image)-1;
     init_cond.x_pixels_in_detector = double(h5read(master_fp,'/entry/instrument/detector/detectorSpecific/x_pixels_in_detector'));
