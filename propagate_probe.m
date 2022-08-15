@@ -10,6 +10,11 @@ function [propagated_probe,propagated_x_axis,propagated_y_axis]  = propagate_pro
     lambda = wavelength; %[m]
     k = 2*pi/lambda;
     ModeNum = size(probe,3); 
+    if strcmpi(class(probe),'gpuArray')
+        probe_data_type = class(gather(probe));
+    else
+        probe_data_type = class(probe);
+    end
     
     xi_axis_res = abs(xi_axis(2)-xi_axis(1));
     eta_axis_res = abs(eta_axis(2)-eta_axis(1));
@@ -25,6 +30,16 @@ function [propagated_probe,propagated_x_axis,propagated_y_axis]  = propagate_pro
     
     U_propagated = zeros(U_propagated_yp_size,U_propagated_xp_size,ModeNum);
     
+    % transform datatype of arrrays 
+    xp_axis = cast(xp_axis,probe_data_type);
+    yp_axis = cast(yp_axis,probe_data_type);
+    if strcmpi(class(probe),'gpuArray')
+        U_propagated = gpuArray(cast(U_propagated,probe_data_type));
+    else
+        U_propagated = cast(U_propagated,probe_data_type);
+    end
+    
+
     % calculate propagating
     for ModeSN = 1:ModeNum
         U_measured = probe(:,:,ModeSN);
