@@ -289,7 +289,7 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
 end
 
 function Upstream_ROI = genUpstreamROI(ProbeConf)
-    probe = zeros(clip_size);
+    probe = zeros(ProbeConf.clip_size);
     z = -ProbeConf.ApertureDist; % in meter
     ApertureSize = ProbeConf.ApertureSize; % in meter
     wavelength = ProbeConf.wavelength;
