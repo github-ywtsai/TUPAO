@@ -11,7 +11,8 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     object = object_info.real_space;
     probe = probe_info.real_space;
     chi2_temp = zeros(1,init_cond.n_of_data);
-    
+    individual_mask = measurement_info.individual_mask;
+    individual_mask_active_area = measurement_info.individual_mask_active_area;
     
     % info. for upstream probe constrain
     wavelength = init_cond.wavelength;
@@ -25,6 +26,9 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         probe = gpuArray(probe);
         chi2_temp = gpuArray(chi2_temp);
         upstream_ROI = gpuArray(upstream_ROI);
+        measured_amp = gpuArray(measured_amp);
+        individual_mask = gpuArray(individual_mask);
+        individual_mask_active_area = gpuArray(individual_mask_active_area);
     end
     
     if iteration_para.real_space_constraint_status == 1
@@ -41,9 +45,9 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
 
     
     for data_sn = interesting_table
-        data = gpuArray(measured_amp{data_sn});
-        mask = gpuArray(measurement_info.individual_mask{data_sn});
-        active_area = gpuArray(measurement_info.individual_mask_active_area(data_sn));
+        data = measured_amp(:,:,data_sn);
+        mask = individual_mask(:,:,data_sn);
+        active_area = individual_mask_active_area(data_sn);
         
         exp_cen_row_idx = object_info.exp_pos_idx(data_sn,1) + probe_info.pos_correct_pixel(data_sn,1);
         exp_cen_col_idx = object_info.exp_pos_idx(data_sn,2) + probe_info.pos_correct_pixel(data_sn,2);

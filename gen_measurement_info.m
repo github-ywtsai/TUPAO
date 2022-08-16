@@ -96,8 +96,19 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
         %title(GUIh.PlotArea.Data_axes,sprintf('Raw data max. = %.1f',max(data,[],'all')))
         %axis(GUIh.PlotArea.Data_axes,'image')
         %drawnow
+        
         fprintf('Done.\n');
     end
+    
+    % convert cell to matrix for speedup when GPU applied
+    measured_amp_temp = zeros(rawdata_clip_size,rawdata_clip_size,numel(measured_amp));
+    individual_mask_temp = false(rawdata_clip_size,rawdata_clip_size,numel(individual_mask));
+    for SN = 1:numel(measured_amp)
+        measured_amp_temp(:,:,SN) = measured_amp{SN};
+        individual_mask_temp(:,:,SN) = individual_mask{SN};
+    end
+    measured_amp = measured_amp_temp;
+    individual_mask = individual_mask_temp;
     
     %% save to template file measured_amp.mat
     measured_amp_ff = init_cond.results_path;
