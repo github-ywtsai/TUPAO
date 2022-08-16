@@ -2,10 +2,10 @@ function updated_pos_correct_pixel = position_correction(measured_amp,init_cond,
     
     
     object = object_info.real_space;
-    probe = gpuArray(probe_info.real_space);
-    chi2_temp = gpuArray(zeros(1,init_cond.n_of_data));
+    probe = probe_info.real_space;
     updated_pos_correct_pixel = zeros(init_cond.n_of_data,2);
-    
+    individual_mask = measurement_info.individual_mask;
+    individual_mask_active_area = measurement_info.individual_mask_active_area;
     measured_amp_max = measurement_info.measured_amp_max;
     
     
@@ -29,9 +29,9 @@ function updated_pos_correct_pixel = position_correction(measured_amp,init_cond,
         row_extend_pixel = round(r.*sin(th));
         col_extend_pixel = round(r.*cos(th));
         
-        data = gpuArray(measured_amp{data_sn});
-        mask = gpuArray(measurement_info.individual_mask{data_sn});
-        active_area = gpuArray(measurement_info.individual_mask_active_area(data_sn));
+        data = measured_amp(:,:,data_sn);
+        mask = individual_mask(:,:,data_sn);
+        active_area = individual_mask_active_area(data_sn);
         
         
         exp_cen_row_idx = object_info.exp_pos_idx(data_sn,1) + probe_info.pos_correct_pixel(data_sn,1) + row_extend_pixel;
@@ -42,15 +42,15 @@ function updated_pos_correct_pixel = position_correction(measured_amp,init_cond,
         col_start_idx = exp_cen_col_idx - (init_cond.effective_clip_size - 1)/2;
         col_end_idx = exp_cen_col_idx + (init_cond.effective_clip_size - 1)/2;
         
-        % pre-arrange clip_object
-        clip_object_all = zeros(init_cond.effective_clip_size,init_cond.effective_clip_size,n_of_extended_pos,'single');
-        for extended_pos_sn = 1 : n_of_extended_pos
-            clip_object_all(:,:,extended_pos_sn) = object(row_start_idx(extended_pos_sn):row_end_idx(extended_pos_sn),col_start_idx(extended_pos_sn):col_end_idx(extended_pos_sn));   
+        
+        chi2_for_PC = zeros(1,n_of_extended_pos,'single');
+        
+        if init_cond.using_GPU
+            chi2_for_PC = gpuArray(chi2_for_PC);
         end
         
-        chi2_for_PC = gpuArray(zeros(1,n_of_extended_pos,'single'));
         for extended_pos_sn = 1 : n_of_extended_pos
-            clip_object = gpuArray(clip_object_all(:,:,extended_pos_sn));
+            clip_object = object(row_start_idx(extended_pos_sn):row_end_idx(extended_pos_sn),col_start_idx(extended_pos_sn):col_end_idx(extended_pos_sn));   
 
             % formula (3) S(12)
             psi = probe .* clip_object;
@@ -67,12 +67,10 @@ function updated_pos_correct_pixel = position_correction(measured_amp,init_cond,
             % multi-probe results are non-interference. using sqrt(|a|^2 + |b|^2 + ....)
             
             % calculate chi^2
-            chi2_for_PC(1,extended_pos_sn) = sum(sum( (Psi_amp_flat -data).^2.*~mask))/active_area;
+            chi2_for_PC(1,extended_pos_sn) = sum((Psi_amp_flat -data).^2.*~mask,'all')/active_area;
         end
-        [~,min_chi2_idx] = min(gather(chi2_for_PC));
+        [~,min_chi2_idx] = min(chi2_for_PC);
         updated_pos_correct_pixel(data_sn,:) = probe_info.pos_correct_pixel(data_sn,:) + [row_extend_pixel(min_chi2_idx) col_extend_pixel(min_chi2_idx)];
         
     end
-
-    
 end
