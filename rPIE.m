@@ -10,7 +10,7 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     chi2_temp = zeros(1,init_cond.n_of_data);
     individual_mask = measurement_info.individual_mask;
     individual_mask_active_area = measurement_info.individual_mask_active_area;
-    whos object probe chi2_temp individual_mask individual_mask_active_area
+
     % info. for upstream probe constrain
     wavelength = init_cond.wavelength;
     probe_x_axis = probe_info.real_space_xaxis;
