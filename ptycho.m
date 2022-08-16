@@ -9,11 +9,17 @@ function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,pr
     end
     SectionFilePrefix = sprintf('SN%d',sectionfile_info.SN);
     
-    %% arrange GPU
+    %% arm GPU
     if init_cond.using_GPU
     fprintf('Arrange GPU %d...',init_cond.using_GPU);
     gpuDevice(init_cond.using_GPU);
     measured_amp = gpuArray(measured_amp);
+    object_info.real_space = gpuArray(object_info.real_space);
+    probe_info.real_space = gpuArray(probe_info.real_space);
+    probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
+    measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
+    measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
+    iteration_para.chi2 = gpuArray(iteration_para.chi2);
     fprintf('\tDone.\n');
     end
 
@@ -99,12 +105,30 @@ function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,pr
             SectionFN = sprintf('%s_Run%d.mat',SectionFilePrefix,CurrentRun);
             SectionFP = fullfile(init_cond.results_path,SectionFN);
             fprintf('Saving section file %s...\t',SectionFN)
+            % get data from GPU
+            if init_cond.using_GPU
+                object_info.real_space = gather(object_info.real_space);
+                probe_info.real_space = gather(probe_info.real_space);
+                probe_info.ProbeConf.upstream_ROI = gather(probe_info.ProbeConf.upstream_ROI);
+                measurement_info.individual_mask = gather(measurement_info.individual_mask);
+                measurement_info.individual_mask_active_area = gather(measurement_info.individual_mask_active_area);
+                iteration_para.chi2 = gather(iteration_para.chi2);
+            end
             save(SectionFP,'init_cond','mask_info','measurement_info','object_info','probe_info','iteration_para','sectionfile_info')
+            % move data to GPU
+            if init_cond.using_GPU
+                object_info.real_space = gpuArray(object_info.real_space);
+                probe_info.real_space = gpuArray(probe_info.real_space);
+                probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
+                measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
+                measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
+                iteration_para.chi2 = gpuArray(iteration_para.chi2);
+            end
             fprintf('Done.\n')
         end
         
     end
-   
+    
     
     
 end

@@ -5,15 +5,12 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     % spectrum = fftshift(fft2(ifftshift(myimage))
     % myimage = fftshift(ifft2(ifftshift(spectrum))
     
-    if init_cond.using_GPU
-        UsingGPU = true;
-    end
     object = object_info.real_space;
     probe = probe_info.real_space;
     chi2_temp = zeros(1,init_cond.n_of_data);
     individual_mask = measurement_info.individual_mask;
     individual_mask_active_area = measurement_info.individual_mask_active_area;
-    
+    whos object probe chi2_temp individual_mask individual_mask_active_area
     % info. for upstream probe constrain
     wavelength = init_cond.wavelength;
     probe_x_axis = probe_info.real_space_xaxis;
@@ -21,16 +18,16 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     propagating_dist = probe_info.ProbeConf.ApertureDist;
     upstream_ROI = probe_info.ProbeConf.upstream_ROI;
     
-    if UsingGPU
-        object = gpuArray(object);
-        probe = gpuArray(probe);
+    if init_cond.using_GPU
+        %object = gpuArray(object);
+        % probe = gpuArray(probe);
         chi2_temp = gpuArray(chi2_temp);
-        upstream_ROI = gpuArray(upstream_ROI);
-        % measured_amp = gpuArray(measured_amp);
-        individual_mask = gpuArray(individual_mask);
-        individual_mask_active_area = gpuArray(individual_mask_active_area);
+        %upstream_ROI = gpuArray(upstream_ROI);
+        %measured_amp = gpuArray(measured_amp);
+        %individual_mask = gpuArray(individual_mask);
+        %individual_mask_active_area = gpuArray(individual_mask_active_area);
     end
-    
+
     if iteration_para.real_space_constraint_status == 1
             real_space_constraint_factor = iteration_para.real_space_constraint_factor;
             if real_space_constraint_factor > 0
@@ -116,9 +113,9 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     end
     
 
-    chi2_sum = gather(sum(chi2_temp));
-    updated_object = gather(object);
-    updated_probe = gather(probe);
+    chi2_sum = sum(chi2_temp);
+    updated_object = object;
+    updated_probe = probe;
 
     
 end
