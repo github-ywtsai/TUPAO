@@ -5,16 +5,27 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     % spectrum = fftshift(fft2(ifftshift(myimage))
     % myimage = fftshift(ifft2(ifftshift(spectrum))
     
+    if init_cond.using_GPU
+        UsingGPU = true;
+    end
     object = object_info.real_space;
-    probe = gpuArray(probe_info.real_space);
-    chi2_temp = gpuArray(zeros(1,init_cond.n_of_data));
+    probe = probe_info.real_space;
+    chi2_temp = zeros(1,init_cond.n_of_data);
+    
     
     % info. for upstream probe constrain
     wavelength = init_cond.wavelength;
     probe_x_axis = probe_info.real_space_xaxis;
     probe_y_axis = probe_info.real_space_yaxis;
     propagating_dist = probe_info.ProbeConf.ApertureDist;
-    upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
+    upstream_ROI = probe_info.ProbeConf.upstream_ROI;
+    
+    if UsingGPU
+        object = gpuArray(object);
+        probe = gpuArray(probe);
+        chi2_temp = gpuArray(chi2_temp);
+        upstream_ROI = gpuArray(upstream_ROI);
+    end
     
     if iteration_para.real_space_constraint_status == 1
             real_space_constraint_factor = iteration_para.real_space_constraint_factor;
@@ -27,9 +38,7 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     end
     
     interesting_table = iteration_para.interesting_table;
-    %if round(rand())
-    %    interesting_table = fliplr(interesting_table);
-    %end
+
     
     for data_sn = interesting_table
         data = gpuArray(measured_amp{data_sn});
@@ -42,8 +51,8 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         row_end_idx = exp_cen_row_idx + (init_cond.effective_clip_size - 1)/2;
         col_start_idx = exp_cen_col_idx - (init_cond.effective_clip_size - 1)/2;
         col_end_idx = exp_cen_col_idx + (init_cond.effective_clip_size - 1)/2;   
-        clip_object = gpuArray(object(row_start_idx:row_end_idx,col_start_idx:col_end_idx));
-        
+        clip_object = object(row_start_idx:row_end_idx,col_start_idx:col_end_idx);
+
         % formula (3) S(12)
         psi = probe .* clip_object;
         % psi(:,:,k)
@@ -102,9 +111,10 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         
     end
     
+
     chi2_sum = gather(sum(chi2_temp));
     updated_object = gather(object);
     updated_probe = gather(probe);
-    
+
     
 end
