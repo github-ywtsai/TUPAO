@@ -285,4 +285,19 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     ProbeConf.real_space_xaxis = real_space_xaxis;
     ProbeConf.real_space_yaxis = real_space_yaxis;
     
+    ProbeConf.upstream_ROI = genUpstreamROI(ProbeConf);
+end
+
+function Upstream_ROI = genUpstreamROI(ProbeConf)
+    probe = zeros(clip_size);
+    z = -ProbeConf.ApertureDist; % in meter
+    ApertureSize = ProbeConf.ApertureSize; % in meter
+    wavelength = ProbeConf.wavelength;
+    xi_axis =  ProbeConf.real_space_xaxis;
+    eta_axis = ProbeConf.real_space_yaxis;
+    
+    [propagated_probe,propagated_x_axis,propagated_y_axis]  = propagate_probe(z,probe,wavelength,xi_axis,eta_axis);
+    [propagated_x, propagated_y] = meshgrid(propagated_x_axis,propagated_y_axis);
+    propagated_r_matrix = sqrt(propagated_x.^2 + propagated_y.^2);
+    Upstream_ROI = propagated_r_matrix<  (ApertureSize/2);
 end
