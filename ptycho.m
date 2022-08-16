@@ -10,9 +10,12 @@ function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,pr
     SectionFilePrefix = sprintf('SN%d',sectionfile_info.SN);
     
     %% arrange GPU
+    if init_cond.using_GPU
     fprintf('Arrange GPU %d...',init_cond.using_GPU);
     gpuDevice(init_cond.using_GPU);
+    measured_amp = gpuArray(measured_amp);
     fprintf('\tDone.\n');
+    end
 
     %% iteration part    
     while iteration_para.FinishedRun + 1 <= iteration_para.max_iteration_num
