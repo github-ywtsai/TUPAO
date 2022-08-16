@@ -80,7 +80,7 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         % formula (6) (S21)
         first_term = iteration_para.alpha / max(max( sum(abs(probe).^2,3)));
         second_term = sum(conj(probe).* diff_psi_p_psi,3); 
-        object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gather(clip_object + first_term * second_term);
+        object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = clip_object + first_term * second_term;
         
         %update probe
         % formula (7) (S22)
@@ -99,9 +99,9 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         
     end
     
-    chi2_sum = gather(sum(chi2_temp));
-    updated_object = gather(object);
-    updated_probe = gather(probe);
+    chi2_sum = sum(chi2_temp);
+    updated_object = object;
+    updated_probe = probe;
     
     
 end
