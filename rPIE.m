@@ -8,9 +8,13 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     object = object_info.real_space;
     probe = gpuArray(probe_info.real_space);
     chi2_temp = gpuArray(zeros(1,init_cond.n_of_data));
-    probe_deny_mask = gpuArray(single(iteration_para.probe_deny_mask));
-    measured_amp_max = measurement_info.measured_amp_max;
     
+    % info. for upstream probe constrain
+    wavelength = init_cond.wavelength;
+    probe_x_axis = probe_info.real_space_xaxis;
+    probe_y_axis = probe_info.real_space_yaxis;
+    propagating_dist = probe_info.ProbeConf.ApertureDist;
+    upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
     
     if iteration_para.real_space_constraint_status == 1
             real_space_constraint_factor = iteration_para.real_space_constraint_factor;
@@ -87,9 +91,14 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         %second_term = conj(clip_object).* diff_psi_p_psi; % ePIE
         %probe = probe + first_term * second_term; % ePIE
         end
+
+        if probe_info.ProbeConf.UpStreamConstrain
+            [upstream_probe,upstream_x_axis,upstream_y_axis] = propagate_probe(-propagating_dist,probe,wavelength,probe_x_axis,probe_y_axis);
+            upstream_probe = upstream_probe.*upstream_ROI;
+            [probe,~,~] = propagate_probe(propagating_dist,upstream_probe,wavelength,upstream_x_axis,upstream_y_axis);
+        end
         
         clear first_term second_term diff_psi_p_psi
-        
         
     end
     
