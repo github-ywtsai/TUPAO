@@ -34,6 +34,12 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
             end
     end
     
+    if probe_info.ProbeConf.UpStreamConstrain
+            [upstream_probe,upstream_x_axis,upstream_y_axis] = propagate_probe(-propagating_dist,probe,wavelength,probe_x_axis,probe_y_axis);
+            upstream_probe = upstream_probe.*upstream_ROI;
+            [probe,~,~] = propagate_probe(propagating_dist,upstream_probe,wavelength,upstream_x_axis,upstream_y_axis);
+    end
+    
     interesting_table = iteration_para.interesting_table;
     %if round(rand())
     %    interesting_table = fliplr(interesting_table);
@@ -88,15 +94,8 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         second_term = conj(clip_object).* diff_psi_p_psi;
         probe = probe + first_term * second_term;
         
-        if probe_info.ProbeConf.UpStreamConstrain
-            [upstream_probe,upstream_x_axis,upstream_y_axis] = propagate_probe(-propagating_dist,probe,wavelength,probe_x_axis,probe_y_axis);
-            upstream_probe = upstream_probe.*upstream_ROI;
-            [probe,~,~] = propagate_probe(propagating_dist,upstream_probe,wavelength,upstream_x_axis,upstream_y_axis);
-        end
-        
         clear first_term second_term diff_psi_p_psi
-        
-        
+          
     end
     
     chi2_sum = sum(chi2_temp);
