@@ -27,6 +27,31 @@ function init_cond = gen_init_cond(ConfigFP)
     %fprintf('Done.\n\n')
 end
 
+
+function output = get_exp_pos_bluesky(init_cond)
+    pos_record_fp = init_cond.pos_record_fp;
+    table_temp = readtable(pos_record_fp);
+    VariableDescriptions = table_temp.Properties.VariableDescriptions;
+    Variables = table_temp.Variables;
+    xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableDescriptions));
+    zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableDescriptions));
+    exp_pos_rbv_z_x = Variables(:,[zidx,xidx]);
+    exp_pos_rbv_z_x = single(exp_pos_rbv_z_x * 1E3); % convert from um into mm
+    [temp,~] = max(exp_pos_rbv_z_x);
+    exp_pos_rbv_z_max = temp(1);
+    exp_pos_rbv_x_max = temp(2);
+    [temp,~] = min(exp_pos_rbv_z_x);
+    exp_pos_rbv_z_min = temp(1);
+    exp_pos_rbv_x_min = temp(2);
+
+    exp_pos_rbv_z_cen = (exp_pos_rbv_z_max + exp_pos_rbv_z_min)/2;
+    exp_pos_rbv_x_cen = (exp_pos_rbv_x_max + exp_pos_rbv_x_min)/2;
+
+    exp_pos = -[exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
+    output.exp_pos = exp_pos * 1E-3; % covert unit from [mm] to [m]
+    [output.n_of_data, ~] = size(exp_pos);
+end
+    
 function output = get_exp_pos(init_cond)
 
     pos_record_fp = init_cond.pos_record_fp;
