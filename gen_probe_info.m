@@ -299,5 +299,6 @@ function Upstream_ROI = genUpstreamROI(ProbeConf)
     [propagated_probe,propagated_x_axis,propagated_y_axis]  = propagate_probe(z,probe,wavelength,xi_axis,eta_axis);
     [propagated_x, propagated_y] = meshgrid(propagated_x_axis,propagated_y_axis);
     propagated_r_matrix = sqrt(propagated_x.^2 + propagated_y.^2);
-    Upstream_ROI = propagated_r_matrix<  (ApertureSize/2);
+    Upstream_ROI = ones(ProbeConf.clip_size);
+    Upstream_ROI(propagated_r_matrix >  (ApertureSize/2)) = 0.5;
 end
