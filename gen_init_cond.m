@@ -32,11 +32,16 @@ function output = get_exp_pos_bluesky(init_cond)
     pos_record_fp = init_cond.pos_record_fp;
     table_temp = readtable(pos_record_fp);
     VariableDescriptions = table_temp.Properties.VariableDescriptions;
-    Variables = table_temp.Variables;
     xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableDescriptions));
     zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableDescriptions));
-    exp_pos_rbv_z_x = Variables(:,[zidx,xidx]);
-    exp_pos_rbv_z_x = single(exp_pos_rbv_z_x * 1E3); % convert from um into mm
+    xaxis_variablename = table_temp.Properties.VariableNames{xidx};
+    zaxis_variablename = table_temp.Properties.VariableNames{zidx};
+    cmd = sprintf('xpos = table_temp.%s;',xaxis_variablename);
+    eval(cmd);
+    cmd = sprintf('zpos = table_temp.%s;',zaxis_variablename);
+    eval(cmd);
+    exp_pos_rbv_z_x = [zpos,xpos];
+    exp_pos_rbv_z_x = single(exp_pos_rbv_z_x * 1E-3); % convert from um into mm
     [temp,~] = max(exp_pos_rbv_z_x);
     exp_pos_rbv_z_max = temp(1);
     exp_pos_rbv_x_max = temp(2);
