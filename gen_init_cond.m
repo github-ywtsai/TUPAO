@@ -19,7 +19,8 @@ function init_cond = gen_init_cond(ConfigFP)
 
     
     %fprintf('Loading probe-positions...\t')
-    temp = get_exp_pos(init_cond);
+    %temp = get_exp_pos(init_cond); % homemade scan file
+    temp = get_exp_pos_bluesky(init_cond); % bluesky scan file
     init_cond.exp_pos = temp.exp_pos;
     init_cond.n_of_data = temp.n_of_data;
     %fprintf('Done.\n')
