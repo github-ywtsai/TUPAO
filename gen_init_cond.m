@@ -42,7 +42,7 @@ function output = get_exp_pos_bluesky(init_cond)
     cmd = sprintf('zpos = table_temp.%s;',zaxis_variablename);
     eval(cmd);
     exp_pos_rbv_z_x = [zpos,xpos];
-    exp_pos_rbv_z_x = single(exp_pos_rbv_z_x * 1E-3); % convert from um into mm
+    exp_pos_rbv_z_x = single(exp_pos_rbv_z_x);% in um
     [temp,~] = max(exp_pos_rbv_z_x);
     exp_pos_rbv_z_max = temp(1);
     exp_pos_rbv_x_max = temp(2);
@@ -54,7 +54,7 @@ function output = get_exp_pos_bluesky(init_cond)
     exp_pos_rbv_x_cen = (exp_pos_rbv_x_max + exp_pos_rbv_x_min)/2;
 
     exp_pos = -[exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
-    output.exp_pos = exp_pos * 1E-3; % covert unit from [mm] to [m]
+    output.exp_pos = exp_pos;
     [output.n_of_data, ~] = size(exp_pos);
 end
     
