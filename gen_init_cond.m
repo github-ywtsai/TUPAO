@@ -107,8 +107,9 @@ function init_cond = get_config(ConfigFP)
     % get master file folder
     MasterFF = Value{1};
     % get master file name
-    MasterFN = Value{2};   
-    init_cond.master_fp = fullfile(MasterFF,MasterFN);
+    MasterFN = Value{2};
+    buffer = dir(fullfile(MasterFF,MasterFN));
+    init_cond.master_fp = fullfile(buffer.folder,buffer.name);
     
     %% get manual mask file name and path
     % get mask file folder
@@ -138,7 +139,8 @@ function init_cond = get_config(ConfigFP)
     % get master file name
     ScanFN = Value{9};
     
-    init_cond.pos_record_fp = fullfile(ScanFP,ScanFN);
+    buffer = dir(fullfile(ScanFP,ScanFN));
+    init_cond.pos_record_fp = fullfile(buffer.folder,buffer.name);
     
     %% get prepared data files and iteration files path
     init_cond.results_path = fullfile(Value{10});
