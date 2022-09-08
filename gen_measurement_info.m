@@ -62,6 +62,7 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
         data = single( transpose( h5read( target_fn, link_object_list{target_file_sn},[data_clip_col_start_idx,data_clip_row_start_idx, i - link_index{target_file_sn}(1) + 1],[rawdata_clip_size,rawdata_clip_size,1]) ) );
         
         
+        effective_clip_size = init_cond.effective_clip_size;
         if init_cond.probe_extending_factor ~= 1
             data = data_rescale(data,init_cond.probe_extending_factor);
         end
@@ -101,8 +102,8 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     end
     
     % convert cell to matrix for speedup when GPU applied
-    measured_amp_temp = zeros(rawdata_clip_size,rawdata_clip_size,numel(measured_amp));
-    individual_mask_temp = false(rawdata_clip_size,rawdata_clip_size,numel(individual_mask));
+    measured_amp_temp = zeros(effective_clip_size,effective_clip_size,numel(measured_amp));
+    individual_mask_temp = false(effective_clip_size,effective_clip_size,numel(individual_mask));
     for SN = 1:numel(measured_amp)
         measured_amp_temp(:,:,SN) = measured_amp{SN};
         individual_mask_temp(:,:,SN) = individual_mask{SN};
