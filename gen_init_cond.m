@@ -28,6 +28,20 @@ function init_cond = gen_init_cond(ConfigFP)
     %fprintf('Done.\n\n')
 end
 
+% Note for get exposure position
+% --The defination of the global coordination--
+% +y axis along the beam
+% +z axis is the up direction from the floor
+% +x created by +y and +z by the right hand rule
+%-- Stage direction and the sign of the exp_pos --
+% If the +x and +z directions of stage along the same directions of the global
+% coordination, add - sign on both read back value of x and z.
+% Ex:
+% exp_pos = -[exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
+% If the +z direction and -x direction of stage along the same directions of the global
+% coordination, add - sign on z axis only.
+% Ex:
+% exp_pos = [(exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen)*-1,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
 
 function output = get_exp_pos_bluesky(init_cond)
     pos_record_fp = init_cond.pos_record_fp;
@@ -53,12 +67,15 @@ function output = get_exp_pos_bluesky(init_cond)
     exp_pos_rbv_z_cen = (exp_pos_rbv_z_max + exp_pos_rbv_z_min)/2;
     exp_pos_rbv_x_cen = (exp_pos_rbv_x_max + exp_pos_rbv_x_min)/2;
 
-    exp_pos = [(exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen)*-1,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
+    rel_exp_pos_rbv_z_x = [exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
+    n_exp_pos = size(rel_exp_pos_rbv_z_x,1);
+    redirection_factor = [ones(n_exp_pos,1),-1*ones(n_exp_pos,1)];
+    exp_pos = rel_exp_pos_rbv_z_x.* redirection_factor;
     output.exp_pos = exp_pos*1E-6; % convert from um to m
     [output.n_of_data, ~] = size(exp_pos);
 end
     
-function output = get_exp_pos(init_cond)
+function output = get_exp_pos_25A_python_script(init_cond)
 
     pos_record_fp = init_cond.pos_record_fp;
     fid = fopen(pos_record_fp);
@@ -92,7 +109,10 @@ function output = get_exp_pos(init_cond)
     exp_pos_rbv_z_cen = (exp_pos_rbv_z_max + exp_pos_rbv_z_min)/2;
     exp_pos_rbv_x_cen = (exp_pos_rbv_x_max + exp_pos_rbv_x_min)/2;
 
-    exp_pos = -[exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
+    rel_exp_pos_rbv_z_x = [exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
+    n_exp_pos = size(rel_exp_pos_rbv_z_x,1);
+    redirection_factor = [-1*ones(n_exp_pos,1),-1*ones(n_exp_pos,1)];
+    exp_pos = rel_exp_pos_rbv_z_x.* redirection_factor;
     output.exp_pos = exp_pos * 1E-3; % covert unit from [mm] to [m]
     [output.n_of_data, ~] = size(exp_pos);
     
