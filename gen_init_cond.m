@@ -69,7 +69,7 @@ function output = get_exp_pos_bluesky(init_cond)
 
     rel_exp_pos_rbv_z_x = [exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
     n_exp_pos = size(rel_exp_pos_rbv_z_x,1);
-    redirection_factor = [ones(n_exp_pos,1),-1*ones(n_exp_pos,1)];
+    redirection_factor = [-1*ones(n_exp_pos,1),ones(n_exp_pos,1)];
     exp_pos = rel_exp_pos_rbv_z_x.* redirection_factor;
     output.exp_pos = exp_pos*1E-6; % convert from um to m
     [output.n_of_data, ~] = size(exp_pos);
