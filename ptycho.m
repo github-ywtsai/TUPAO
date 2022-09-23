@@ -94,8 +94,8 @@ function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,pr
         
         %% plot parts
         if iteration_para.draw_results
-            imagesc(axes_obj,angle(object_info.real_space));axes_obj.DataAspectRatio = [1,1,1];
-            imagesc(axes_probe,abs(probe_info.real_space(:,:,1)));axes_probe.DataAspectRatio = [1,1,1];
+            imagesc(axes_obj,object_info.real_space_xaxis,object_info.real_space_yaxis,angle(object_info.real_space));axes_obj.DataAspectRatio = [1,1,1];
+            imagesc(axes_probe,probe_info.real_space_xaxis,probe_info.real_space_yaxis,abs(probe_info.real_space(:,:,1)));axes_probe.DataAspectRatio = [1,1,1];
             loglog(axes_chi2, iteration_para.chi2);
             drawnow
         end
