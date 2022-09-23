@@ -149,6 +149,7 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     y_pixel_size = init_cond. effective_y_pixel_size;
     n_of_data = init_cond.n_of_data;
     amplitude = ProbeConf.photon_flux;
+    wavelength = init_cond.wavelength;
     
     x_res = wavelength * detector_distance / clip_size / x_pixel_size;
     y_res = wavelength * detector_distance / clip_size / y_pixel_size;
@@ -172,7 +173,7 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     if strcmpi(ProbeConf.AdaptProbeMode,'All')
         AdaptProbe= sum(AdaptProbeInfo.real_space,3);
     else
-        AdaptProbe= AdaptProbeInfo.real_space(:,:,str2double(ProbeConf.AdaptProbeMode));
+        AdaptProbe= AdaptProbeInfo.real_space(:,:,ProbeConf.AdaptProbeMode);
     end
     AdaptProbeXAxis = AdaptProbeInfo.real_space_xaxis;
     AdaptProbeYAxis = AdaptProbeInfo.real_space_yaxis;
