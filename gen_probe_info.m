@@ -76,7 +76,7 @@ function RefPosCorrPixel = adapt_PosCorr_info(ProbeConf)
 end
 
 function probe_temp = generate_probe_from_Gaussian(ProbeConf)    
-    amplitude = 1;
+    amplitude = ProbeConf.photon_flux;
     HBSize = ProbeConf.GaussainBeamHSize;
     VBSize = ProbeConf.GaussainBeamVSize;
     probe_col_idx = ProbeConf.probe_col_idx;
@@ -99,9 +99,9 @@ function probe_temp = generate_probe_from_Gaussian(ProbeConf)
         Temp = zeros(ProbeConf.clip_size);
         Temp(Seed) = 1;
         Temp = conv2(Temp,Speckle,'same');
-        % probe_temp = probe_temp.*Temp.*exp(1i*Temp); % break amp and
+        probe_temp = probe_temp.*Temp.*exp(1i*Temp); % break amp and
         % phase
-        probe_temp = probe_temp.*exp(1i*Temp); % only break phase
+        %probe_temp = probe_temp.*exp(1i*Temp); % only break phase
     end
 end
 
