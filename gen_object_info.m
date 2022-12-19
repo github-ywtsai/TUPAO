@@ -45,11 +45,11 @@ function object_info = gen_object_info(init_cond)
     % 20180115 fix the y axis from
     % guessed_object.real_space_yaxis = (object_row_idx(:,1) - object_cen_row_idx) * y_res;
 
-    object_info = pre_assign_object_intensity_flat(init_cond, object_info,0.5);
+    object_info = pre_assign_object_intensity_flat(init_cond, object_info,0.9,1);
 end
 
 
-function object_info = pre_assign_object_intensity_flat(init_cond, object_info,value)
+function object_info = pre_assign_object_intensity_flat(init_cond, object_info,low_value,high_value)
     n_of_data = init_cond.n_of_data;
     exp_pos = init_cond.exp_pos;
     real_space_xaxis = object_info.real_space_xaxis;
@@ -71,11 +71,12 @@ function object_info = pre_assign_object_intensity_flat(init_cond, object_info,v
     end
     
     rng(init_cond.rand_seed + 1)
-    BaseObj = ones(real_space_row_size,real_space_col_size)*value;
-    RandObj = (rand(real_space_row_size,real_space_col_size)-0.5)*value*0.1;
-    RandPhase = exp(1i*rand(real_space_row_size,real_space_col_size)*pi); % phase 0 ~ pi, make image part alway > 0;
+    range = high_value - low_value;
+    level = (high_value + low_value)/2;
+    BaseObj = ones(real_space_row_size,real_space_col_size)*level;
+    RandObj = rand(real_space_row_size,real_space_col_size)*range;
     
-    object_info.real_space = abs(single(BaseObj + RandObj)).*RandPhase;
+    object_info.real_space = abs(single(BaseObj + RandObj));
     object_info.exp_pos_idx = single(exp_pos_idx);
 
 
