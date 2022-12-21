@@ -1,4 +1,4 @@
-function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,sectionfile_info)    
+function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,sectionfile_info)    
     
     %% prepare plot axes
     if iteration_para.draw_results
@@ -13,7 +13,7 @@ function ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,pr
     if init_cond.using_GPU
     fprintf('Arrange GPU %d...',init_cond.using_GPU);
     gpuDevice(init_cond.using_GPU);
-    measured_amp = gpuArray(measured_amp);
+    measured_amp = gpuArray(measurement_info.measured_amp);
     object_info.real_space = gpuArray(object_info.real_space);
     probe_info.real_space = gpuArray(probe_info.real_space);
     probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);

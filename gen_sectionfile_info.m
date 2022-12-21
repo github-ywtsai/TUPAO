@@ -1,10 +1,11 @@
 function sectionfile_info = gen_sectionfile_info(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)
-    tic
-       
-
-    section_fn = sprintf('SN%04d_Run%d.mat',measurement_info.SN,iteration_para.FinishedRun);
+    tic  
+    
+    SN = str2double(datestr(now,'yymmddHHMM'));
+    
+    section_fn = sprintf('SN%04d_Run%d.mat',SN,iteration_para.FinishedRun);
     section_fp = fullfile(init_cond.results_path, section_fn);
-    sectionfile_info.SN = measurement_info.SN;
+    sectionfile_info.SN = SN;
     sectionfile_info.CreateTime{1} = datetime;
     sectionfile_info.FileNmae{1} = section_fn;
     

@@ -6,6 +6,5 @@ object_info = gen_object_info(init_cond);
 probe_info = gen_probe_info(init_cond,'config_probe.txt');
 iteration_para = gen_iteration_para(init_cond,measurement_info,object_info,probe_info,'config_iteration.txt');
 sectionfile_info = gen_sectionfile_info(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
-fprintf('Loading data...\t');load(measurement_info.measured_amp_fp);fprintf('Done.\n');
 
-ptycho(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,sectionfile_info)
+ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,sectionfile_info)

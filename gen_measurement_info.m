@@ -112,31 +112,32 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     individual_mask = individual_mask_temp;
     
     %% save to template file measured_amp.mat
-    measured_amp_ff = init_cond.results_path;
-    SNTemp = str2double(datestr(now,'yymmddHHMM'));
-    % check file exsit or not
-    while true
-        fn = sprintf('SN%d_MeaAmp.mat',SNTemp);
-        fp = fullfile(measured_amp_ff,fn);
-        if exist(fp,'file')
-            SNTemp = SNTemp + 1;
-        else
-            break;
-        end
-    end
+%     measured_amp_ff = init_cond.results_path;
+%     SNTemp = str2double(datestr(now,'yymmddHHMM'));
+%     % check file exsit or not
+%     while true
+%         fn = sprintf('SN%d_MeaAmp.mat',SNTemp);
+%         fp = fullfile(measured_amp_ff,fn);
+%         if exist(fp,'file')
+%             SNTemp = SNTemp + 1;
+%         else
+%             break;
+%         end
+%     end
     
-    measurement_info.SN = SNTemp;
-    measured_amp_fn = sprintf('SN%d_MeaAmp.mat',measurement_info.SN);
-    measured_amp_fp = fullfile(measured_amp_ff, measured_amp_fn);
-    fprintf('Saving results to %s...\t',measured_amp_fp);
-    measurement_info.measured_amp_ff = measured_amp_ff;
-    measurement_info.measured_amp_fn = measured_amp_fn;
-    measurement_info.measured_amp_fp = measured_amp_fp;
+%    measurement_info.SN = SNTemp;
+%    measured_amp_fn = sprintf('SN%d_MeaAmp.mat',measurement_info.SN);
+%    measured_amp_fp = fullfile(measured_amp_ff, measured_amp_fn);
+%    fprintf('Saving results to %s...\t',measured_amp_fp);
+%    measurement_info.measured_amp_ff = measured_amp_ff;
+%    measurement_info.measured_amp_fn = measured_amp_fn;
+%    measurement_info.measured_amp_fp = measured_amp_fp;
     measurement_info.bad_data_sn = bad_data_sn;
     measurement_info.bad_data_mask = bad_data_mask;
     measurement_info.individual_mask = individual_mask;
     measurement_info.individual_mask_active_area = individual_mask_active_area;
     measurement_info.measured_amp_max = measured_amp_max;
-    save(measured_amp_fp,'measured_amp','-v7.3')
-    fprintf('Done.\n');
+    measurement_info.measured_amp = measured_amp;
+%    save(measured_amp_fp,'measured_amp','-v7.3')
+%    fprintf('Done.\n');
 end
