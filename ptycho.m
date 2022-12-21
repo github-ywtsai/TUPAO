@@ -1,4 +1,4 @@
-function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,sectionfile_info)    
+function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)    
     
     %% prepare plot axes
     if iteration_para.draw_results
@@ -7,7 +7,7 @@ function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iter
         axes_probe =  axes(fig,'position',[0.3500 0.0500 0.25 0.9000]);
         axes_chi2 =  axes(fig,'position',[0.6500 0.0500 0.25 0.9000]);
     end
-    SectionFilePrefix = sprintf('SN%d',sectionfile_info.SN);
+%    SectionFilePrefix = sprintf('SN%d',sectionfile_info.SN);
     
     %% arm GPU
     if init_cond.using_GPU
@@ -61,7 +61,7 @@ function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iter
         
 
         %% calculating parts
-        fprintf('%s_Run %d in progressing...',SectionFilePrefix,CurrentRun);
+        fprintf('Run %d in progressing...',CurrentRun);
         tic;       
         % ePIE or rPIE
         if strcmpi(init_cond.core,'ePIE') 
@@ -101,31 +101,31 @@ function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iter
         end
         
         %% save to section file
-        if  and(mod(CurrentRun,iteration_para.saveing_section_file_peroid) == 0,iteration_para.saveing_section_file_peroid ~= 0)
-            SectionFN = sprintf('%s_Run%d.mat',SectionFilePrefix,CurrentRun);
-            SectionFP = fullfile(init_cond.results_path,SectionFN);
-            fprintf('Saving section file %s...\t',SectionFN)
-            % get data from GPU
-            if init_cond.using_GPU
-                object_info.real_space = gather(object_info.real_space);
-                probe_info.real_space = gather(probe_info.real_space);
-                probe_info.ProbeConf.upstream_ROI = gather(probe_info.ProbeConf.upstream_ROI);
-                measurement_info.individual_mask = gather(measurement_info.individual_mask);
-                measurement_info.individual_mask_active_area = gather(measurement_info.individual_mask_active_area);
-                iteration_para.chi2 = gather(iteration_para.chi2);
-            end
-            save(SectionFP,'init_cond','mask_info','measurement_info','object_info','probe_info','iteration_para','sectionfile_info')
-            % move data to GPU
-            if init_cond.using_GPU
-                object_info.real_space = gpuArray(object_info.real_space);
-                probe_info.real_space = gpuArray(probe_info.real_space);
-                probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
-                measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
-                measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
-                iteration_para.chi2 = gpuArray(iteration_para.chi2);
-            end
-            fprintf('Done.\n')
-        end
+%         if  and(mod(CurrentRun,iteration_para.saveing_section_file_peroid) == 0,iteration_para.saveing_section_file_peroid ~= 0)
+%             SectionFN = sprintf('%s_Run%d.mat',SectionFilePrefix,CurrentRun);
+%             SectionFP = fullfile(init_cond.results_path,SectionFN);
+%             fprintf('Saving section file %s...\t',SectionFN)
+%             % get data from GPU
+%             if init_cond.using_GPU
+%                 object_info.real_space = gather(object_info.real_space);
+%                 probe_info.real_space = gather(probe_info.real_space);
+%                 probe_info.ProbeConf.upstream_ROI = gather(probe_info.ProbeConf.upstream_ROI);
+%                 measurement_info.individual_mask = gather(measurement_info.individual_mask);
+%                 measurement_info.individual_mask_active_area = gather(measurement_info.individual_mask_active_area);
+%                 iteration_para.chi2 = gather(iteration_para.chi2);
+%             end
+%             save(SectionFP,'init_cond','mask_info','measurement_info','object_info','probe_info','iteration_para','sectionfile_info')
+%             % move data to GPU
+%             if init_cond.using_GPU
+%                 object_info.real_space = gpuArray(object_info.real_space);
+%                 probe_info.real_space = gpuArray(probe_info.real_space);
+%                 probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
+%                 measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
+%                 measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
+%                 iteration_para.chi2 = gpuArray(iteration_para.chi2);
+%             end
+%             fprintf('Done.\n')
+%         end
         
     end
     
