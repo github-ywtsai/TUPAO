@@ -105,10 +105,103 @@ function probe_temp = generate_probe_from_Gaussian(ProbeConf)
     end
 end
 
-function probe_temp = generate_probe_from_ZonePlate(ProbeConf)    
+function main_probe = generate_probe_from_ZonePlate(ProbeConf)
+    % the min. pitch dr and the period N for the zone plate design
+    % using formula from Attwood Soft X-rays and Extereme Ultraviolet Radiation
+    %dr = 30e-9; N = 800; %  96 um zoneplate in TPS 25A
+    dr = 50e-9; N = 300; %  60 um zoneplate in TPS 25A
+    % diameter of the zone plate
+    D = 4*N*dr;
+    lambda = ProbeConf.wavelength;
+    f = (4*N*dr^2)/lambda;
+    
+    D_cs = 40e-6; % diameter of the central stop [m]
+    
+    
+    %% define material characterastic
+    % auto calculating: not yet
+    material = 'Au';
+    thickness = 600e-9; % [m]
+    
+    %% calculate refractivity
+    % n(lambda) = 1 - delta(lambda) + i beta(lambda)
+    f1 = 74.9382; % [e/atom] from NIST
+    f2 = 6.0726; % [e/atom] % from NIST
+    re = 2.8179403E-15; % classical electron rauius [m]
+    Na = 6.02214129E23; % Avogadro constant [1/mol]
+    Ma = 196.966569; % molar mass [g/mol]
+    rho = 19.32; % density [g/cm^3]
+    rho = rho / (1E-2)^3; % convert unit from [g cm-3] to [g m-3]
+    na = rho*Na/Ma; % number density
+    delta = na*re*lambda^2/2/pi*f1;
+    beta =  na*re*lambda^2/2/pi*f2;
+    n_refractivity = 1 - delta + 1i * beta;
+    
+    % E(z) = E0 * exp(i * n k z)
+    % modulator = E(z)/E0 = exp(i * n k z)
+    zp_modulation_factor = exp(1i * n_refractivity * 2*pi/lambda * thickness);
+    
+    % central stop modulation facotr
+    cs_modulation_factor = 0;
+    
+    %% create zone plate with central stop
+    n = 0:N;
+    rn = sqrt(n*lambda*f+(n*lambda).^2/4);
+    
+    % create zp
+    pix_res = dr/2;
+    range = D*1.5;
+    pix_num = round(range/pix_res);
+    if mod(pix_num,2)==0
+        pix_num = pix_num + 1;
+    end
+    cen_idx = (pix_num+1)/2;
+    zp = zeros(pix_num);
+    x_axis = ((1:pix_num)-cen_idx)*pix_res;
+    y_axis = x_axis*-1; % the direction of y is inverse of the row axis
+    [x_matrix,y_matrix] = meshgrid(x_axis,y_axis);
+    distance_map = sqrt(x_matrix.^2 + y_matrix.^2);
+    
+    for n_sn = flip(0:N)
+        if mod(n_sn,2) == 0
+            zp(distance_map<rn(n_sn+1)) = zp_modulation_factor;
+        else
+            zp(distance_map<rn(n_sn+1)) = 0;
+        end
+    end
+
+    % create cs
+    cs = ones(pix_num);
+    cs(distance_map<D_cs/2) = cs_modulation_factor;
+    
+    exitwave = zp.*cs;
+    
+    %% gen probe
+    % gen on traget probe
+    propagating_distance = f + ProbeConf.ZoneplateOffFocal;
+    [probe_temp,probe_temp_x_axis,probe_temp_y_axis] = propagate_probe(propagating_distance,exitwave,lambda,x_axis,y_axis);
+    
+    % rescale on target probe
+    probe_temp_res = abs(probe_temp_x_axis(2) - probe_temp_x_axis(1));
+    rescale_factor = probe_temp_res/ProbeConf.x_res;
+    rescale_pix_num = round(pix_num*rescale_factor);
+    if mod(rescale_pix_num,2) == 0
+        rescale_pix_num = rescale_pix_num + 1;
+    end
+    probe_temp_rescale = imresize(probe_temp,[rescale_pix_num,rescale_pix_num]);
+    
+    rescale_cen = (rescale_pix_num + 1)/2;
+    extend_range = (ProbeConf.clip_size-1)/2;
+    clip_range = rescale_cen-extend_range:rescale_cen+extend_range;
+    main_probe = probe_temp_rescale(clip_range,clip_range);
+    main_probe = main_probe * ProbeConf.photon_flux;
+end
+    
+
+function probe_temp = generate_probe_from_ZonePlate_old(ProbeConf)    
     % using formula A = (1+cos(kr^2) )/2
-    Beamsize = 0.5; % [um]
-    Broken = 1;
+    Beamsize = ProbeConf.GaussainBeamHSize; % [um]
+    Broken = ProbeConf.GaussainBroken;
     r0 = Beamsize/2; % [um]
     r0 = r0*1E-6; % in [m]
     k = pi/2/r0^2;
@@ -243,17 +336,20 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     %% Define by parameters (gaussian)
     ProbeConf.GaussainBeamVSize = Value{4}*1E-6; % from um to m
     ProbeConf.GaussainBeamHSize = Value{5}*1E-6; % from um to m
-    ProbeConf.GaussainBroken = logical(Value{6});
+    ProbeConf.GaussainBroken = logical(Value{6}); 
+    
+    %% Define by parameters (zone plate)
+    ProbeConf.ZoneplateOffFocal = Value{7}*1E-6 ; % from um to m
     
     %% Adapt from another result
-    ProbeConf.RefProbeFP = Value{7};
-    ProbeConf.AdaptProbeMode = Value{8};
-    ProbeConf.AdapPosCorr = logical(Value{9});
+    ProbeConf.RefProbeFP = Value{8};
+    ProbeConf.AdaptProbeMode = Value{9};
+    ProbeConf.AdapPosCorr = logical(Value{10});
     
     %% probe upstream constrain
-    ProbeConf.UpStreamConstrain = logical(Value{10});
-    ProbeConf.ApertureDist = Value{11}; % in meter
-    ProbeConf.ApertureSize = Value{12}*1E-6; % from um to meter
+    ProbeConf.UpStreamConstrain = logical(Value{11});
+    ProbeConf.ApertureDist = Value{12}; % in meter
+    ProbeConf.ApertureSize = Value{13}*1E-6; % from um to meter
     
     clip_size = init_cond.effective_clip_size;
     n_of_data = init_cond.n_of_data;
