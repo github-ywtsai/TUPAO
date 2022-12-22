@@ -5,6 +5,7 @@ function probe_info = gen_probe_info(init_cond,probeconfigFP)
     % generate empty probe   
     real_space = zeros(ProbeConf.clip_size,ProbeConf.clip_size,ProbeConf.Mp);
     
+    fprintf('Simulating probe...')
     switch ProbeConf.ProbGenMode
         case 'Gaussian'
             probe_temp = generate_probe_from_Gaussian(ProbeConf);
@@ -13,6 +14,7 @@ function probe_info = gen_probe_info(init_cond,probeconfigFP)
         case 'Adapt from another result'
             probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf);
     end
+    fprintf('\tDone.\n')
     %normalize
     Isum = sum(abs(probe_temp).^2,'all');
     ratio = sqrt(ProbeConf.photon_flux*init_cond.count_time/Isum);
