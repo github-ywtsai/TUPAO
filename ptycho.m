@@ -1,4 +1,4 @@
-function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)    
+function [updated_object_info, updated_probe_info, updated_iteration_para] =  ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)    
     
     %% prepare plot axes
     if iteration_para.draw_results
@@ -47,12 +47,21 @@ function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iter
         end
         
         %% check beta and position correction and itnesity normlization start point
+        % smooth part
+        if mod(CurrentRun,40)==0 && CurrentRun<200
+            object_info.real_space = conv2(object_info.real_space,ones(5,5),'same')/sum(ones(5,5),'all');
+        end
         
+%         if mod(CurrentRun,25)==0 && CurrentRun<200
+%             for probe_sn = 1:probe_info.Mp
+%                 probe_info.real_space(:,:,probe_sn) = conv2(probe_info.real_space(:,:,probe_sn),rand(3,3),'same');
+%             end
+%         end
         
         %PC parts
         if iteration_para.pos_correction_status == 1
             tic;
-            fprintf('%s_Run %d: position correcting...',SectionFilePrefix,CurrentRun);
+            fprintf('Run %d: position correcting...',CurrentRun);
             updated_pos_correct_pixel = position_correction(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
             probe_info.pos_correct_pixel = updated_pos_correct_pixel;
             ElapsedT = toc;
@@ -129,6 +138,16 @@ function ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iter
         
     end
     
-    
+    updated_object_info = object_info;
+    updated_probe_info = probe_info;
+    updated_iteration_para = iteration_para;
+    if init_cond.using_GPU
+        updated_object_info.real_space = gather(updated_object_info.real_space);
+        updated_probe_info.real_space = gather(updated_probe_info.real_space);
+        updated_probe_info.ProbeConf.upstream_ROI = gather(updated_probe_info.ProbeConf.upstream_ROI);
+        updated_iteration_para.chi2 = gather(updated_iteration_para.chi2);
+        measurement_info.individual_mask = gather(measurement_info.individual_mask);
+        measurement_info.individual_mask_active_area = gather(measurement_info.individual_mask_active_area);
+    end
     
 end
