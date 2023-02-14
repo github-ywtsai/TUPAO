@@ -196,7 +196,15 @@ function main_probe = generate_probe_from_ZonePlate(ProbeConf)
     extend_range = (ProbeConf.clip_size-1)/2;
     clip_range = rescale_cen-extend_range:rescale_cen+extend_range;
     main_probe = probe_temp_rescale(clip_range,clip_range);
-    main_probe = main_probe * ProbeConf.photon_flux;
+    
+    % blur probe
+    blur_width = round(ProbeConf.clip_size/200);
+    [row_ind,col_ind] = find(ones(ProbeConf.clip_size,ProbeConf.clip_size));
+    cen_ind = (ProbeConf.clip_size+1)/2;
+    row_ind = reshape(row_ind,ProbeConf.clip_size,ProbeConf.clip_size)-cen_ind;
+    col_ind = reshape(col_ind,ProbeConf.clip_size,ProbeConf.clip_size)-cen_ind;
+    blur_matrix = exp(-row_ind.^2/2/pi/blur_width^2) .* exp(-col_ind.^2/2/pi/blur_width^2);
+    main_probe = conv2(main_probe,blur_matrix,'same');
 end
     
 
