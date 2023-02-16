@@ -141,7 +141,7 @@ function main_probe = generate_probe_from_ZonePlate(ProbeConf)
     
     % E(z) = E0 * exp(i * n k z)
     % modulator = E(z)/E0 = exp(i * n k z)
-    zp_modulation_factor = exp(1i * n_refractivity * 2*pi/lambda * thickness);
+    zp_modulation_factor = exp(1i * n_refractivity * 2*pi/lambda * thickness)/exp(1i * 1 * 2*pi/lambda * thickness);
     
     % central stop modulation facotr
     cs_modulation_factor = 0;
