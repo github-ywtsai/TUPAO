@@ -29,9 +29,11 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
         
         %% check beta and position correction and itnesity normlization start point
         if CurrentRun >= iteration_para.beta_start_pt
+            iteration_para.alpha_current = iteration_para.alpha;
             iteration_para.beta_current = iteration_para.beta;
         else
-             iteration_para.beta_current = 0;
+            iteration_para.alpha_current = iteration_para.alpha;
+            iteration_para.beta_current = 0;
         end
         
         if mod(CurrentRun-iteration_para.real_space_constraint_start_pt,iteration_para.real_space_constraint_period) == 0 && CurrentRun >= iteration_para.real_space_constraint_start_pt && iteration_para.real_space_constraint_start_pt ~= 0
@@ -48,8 +50,8 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
         
         %% check beta and position correction and itnesity normlization start point
         % smooth part
-        if mod(CurrentRun,40)==0 && CurrentRun<200
-            object_info.real_space = conv2(object_info.real_space,ones(5,5),'same')/sum(ones(5,5),'all');
+        if mod(CurrentRun,20)==0 && CurrentRun<200
+            object_info.real_space = conv2(object_info.real_space,ones(10,10),'same')/sum(ones(10,10),'all');
         end
         
 %         if mod(CurrentRun,25)==0 && CurrentRun<200
