@@ -18,7 +18,7 @@ function iteration_para = gen_iteration_para(init_cond,measurement_info,object_i
     
 
     iteration_para.alpha = Value{3};
-    
+    iteration_para.alpha_current = 0;
 
     iteration_para.beta_start_pt = Value{4};
     iteration_para.beta = Value{5};
