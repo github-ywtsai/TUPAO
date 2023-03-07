@@ -90,7 +90,7 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         % rPIE
         PMax = max(sum(abs(probe).^2,3),[],'all');
         upper_term = sum(conj(probe).* diff_psi_p_psi,3);
-        lower_term = (1-iteration_para.alpha)*sum(abs(probe).^2,3) + iteration_para.alpha*PMax;
+        lower_term = (1-iteration_para.alpha_current)*sum(abs(probe).^2,3) + iteration_para.alpha*PMax;
         object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gather(clip_object + upper_term./lower_term);
         % first_term = iteration_para.alpha / max(max(sum(abs(probe).^2,3))); % ePIE
         % second_term = sum(conj(probe).* diff_psi_p_psi,3); % ePIE
