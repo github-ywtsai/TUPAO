@@ -1,4 +1,4 @@
-function propagated_probe_info = propagate_probe(z,origin_probe_info)
+function propagated_probe_info = propagate_probe_object(z,origin_probe_info)
     % 20220727
     % fix wrong useing of fft2 cause in incorrect phase information
     % worng usage: fft2(A)
