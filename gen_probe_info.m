@@ -111,19 +111,20 @@ function main_probe = generate_probe_from_ZonePlate(ProbeConf)
     % the min. pitch dr and the period N for the zone plate design
     % using formula from Attwood Soft X-rays and Extereme Ultraviolet Radiation
     %dr = 30e-9; N = 800; %  96 um zoneplate in TPS 25A
-    dr = 50e-9; N = 300; %  60 um zoneplate in TPS 25A
+    %dr = 50e-9; N = 300; %  60 um zoneplate in TPS 25A
+    dr = 70e-9; N = 286; %  60 um zoneplate in TPS 25A
     % diameter of the zone plate
     D = 4*N*dr;
     lambda = ProbeConf.wavelength;
     f = (4*N*dr^2)/lambda;
     
-    D_cs = 40e-6; % diameter of the central stop [m]
+    D_cs = 35e-6; % diameter of the central stop [m]
     
     
     %% define material characterastic
     % auto calculating: not yet
     material = 'Au';
-    thickness = 600e-9; % [m]
+    thickness = 1500e-9; % [m]
     
     %% calculate refractivity
     % n(lambda) = 1 - delta(lambda) + i beta(lambda)
