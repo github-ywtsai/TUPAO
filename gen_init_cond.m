@@ -45,7 +45,7 @@ end
 
 function output = get_exp_pos_bluesky(init_cond)
     pos_record_fp = init_cond.pos_record_fp;
-    table_temp = readtable(pos_record_fp,'Delimiter',' ');
+    table_temp = readtable(pos_record_fp,'Delimiter',{' ',','});
     VariableDescriptions = table_temp.Properties.VariableDescriptions;
     xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableDescriptions));
     zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableDescriptions));
