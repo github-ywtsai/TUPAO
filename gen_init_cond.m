@@ -17,15 +17,6 @@ function init_cond = gen_init_cond(ConfigFP)
         init_cond.effective_y_pixel_size = init_cond.y_pixel_size * init_cond.rawdata_clip_size/init_cond.effective_clip_size;      
     end
 
-    
-    %fprintf('Loading probe-positions...\t')
-    %temp = get_exp_pos(init_cond); % homemade scan file
-    temp = get_exp_pos_bluesky(init_cond); % bluesky scan file
-    init_cond.exp_pos = temp.exp_pos;
-    init_cond.n_of_data = temp.n_of_data;
-    %fprintf('Done.\n')
-    
-    %fprintf('Done.\n\n')
 end
 
 % Note for get exposure position
@@ -43,18 +34,25 @@ end
 % Ex:
 % exp_pos = [(exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen)*-1,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
 
-function output = get_exp_pos_bluesky(init_cond)
-    pos_record_fp = init_cond.pos_record_fp;
-    table_temp = readtable(pos_record_fp,'Delimiter',{' ',','});
+function output = get_exp_cond_bluesky(exp_cond_record_fp)
+    table_temp = readtable(exp_cond_record_fp,'Delimiter',{' ',','});
     VariableDescriptions = table_temp.Properties.VariableDescriptions;
+    MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig1m_file_file_write_name_pattern'),VariableDescriptions));
+    if isempty(MasterFPattern)
+        MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig16m_file_file_write_name_pattern'),VariableDescriptions));
+    end
     xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableDescriptions));
     zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableDescriptions));
+    MasterFPattern_variablename = table_temp.Properties.VariableNames{MasterFPattern};
     xaxis_variablename = table_temp.Properties.VariableNames{xidx};
     zaxis_variablename = table_temp.Properties.VariableNames{zidx};
+    cmd = sprintf('masterfilepattern = table_temp.%s;',MasterFPattern_variablename);
+    eval(cmd);
     cmd = sprintf('xpos = table_temp.%s;',xaxis_variablename);
     eval(cmd);
     cmd = sprintf('zpos = table_temp.%s;',zaxis_variablename);
     eval(cmd);
+    MasterFN = sprintf('%s_master.h5',masterfilepattern{1});
     exp_pos_rbv_z_x = [zpos,xpos];
     exp_pos_rbv_z_x = single(exp_pos_rbv_z_x);% in um
     [temp,~] = max(exp_pos_rbv_z_x);
@@ -73,49 +71,7 @@ function output = get_exp_pos_bluesky(init_cond)
     exp_pos = rel_exp_pos_rbv_z_x.* redirection_factor;
     output.exp_pos = exp_pos*1E-6; % convert from um to m
     [output.n_of_data, ~] = size(exp_pos);
-end
-    
-function output = get_exp_pos_25A_python_script(init_cond)
-
-    pos_record_fp = init_cond.pos_record_fp;
-    fid = fopen(pos_record_fp);
-
-    [~] = fgetl(fid);
-    temp = fgets(fid);
-
-    exp_pos_rbv_z_x = []; % z and than x in mm
-    exp_pos_rbv_y = [];
-    while ischar(temp)
-        temp = strsplit(temp,',');
-        NCol = numel(temp);
-        if NCol == 5 || NCol == 3
-            exp_pos_rbv_z_x = [exp_pos_rbv_z_x;[str2double(temp{2}),str2double(temp{3})]];
-        elseif NCol == 4
-            exp_pos_rbv_z_x = [exp_pos_rbv_z_x;[str2double(temp{2}),str2double(temp{3})]];
-            exp_pos_rbv_y = [exp_pos_rbv_y;str2double(temp{4})];
-        end
-        temp = fgets(fid);
-    end
-    exp_pos_rbv_z_x = single(exp_pos_rbv_z_x);
-    fclose(fid);
-    
-    [temp,~] = max(exp_pos_rbv_z_x);
-    exp_pos_rbv_z_max = temp(1);
-    exp_pos_rbv_x_max = temp(2);
-    [temp,~] = min(exp_pos_rbv_z_x);
-    exp_pos_rbv_z_min = temp(1);
-    exp_pos_rbv_x_min = temp(2);
-
-    exp_pos_rbv_z_cen = (exp_pos_rbv_z_max + exp_pos_rbv_z_min)/2;
-    exp_pos_rbv_x_cen = (exp_pos_rbv_x_max + exp_pos_rbv_x_min)/2;
-
-    rel_exp_pos_rbv_z_x = [exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
-    n_exp_pos = size(rel_exp_pos_rbv_z_x,1);
-    redirection_factor = [-1*ones(n_exp_pos,1),-1*ones(n_exp_pos,1)];
-    exp_pos = rel_exp_pos_rbv_z_x.* redirection_factor;
-    output.exp_pos = exp_pos * 1E-3; % covert unit from [mm] to [m]
-    [output.n_of_data, ~] = size(exp_pos);
-    
+    output.MasterFN = MasterFN;
 end
 
 function init_cond = get_config(ConfigFP)
@@ -123,21 +79,24 @@ function init_cond = get_config(ConfigFP)
     Temp(1,:) = []; % remove header
     Value = Temp(:,1); Discription = Temp(:,2);
 
-    %% get master file name and path
-    % get master file folder
-    MasterFF = Value{1};
-    % get master file name
-    MasterFN = Value{2};
-    buffer = dir(fullfile(MasterFF,MasterFN));
-    init_cond.master_fp = fullfile(buffer.folder,buffer.name);
+    % get  file folder
+    DataFF = Value{1};
+    % get expeirmentcal condition file name and file path
+    ScanFN = Value{2};   
+    buffer = dir(fullfile(DataFF,ScanFN));
+    init_cond.exp_cond_record_fp = fullfile(buffer.folder,buffer.name);
     
-    %% get manual mask file name and path
-    % get mask file folder
-    ManualMaskFF = Value{3};
-    % get mask file name
+    % get master fn and exposure position
+    temp = get_exp_cond_bluesky(init_cond.exp_cond_record_fp);
+    buffer = dir(fullfile(DataFF,temp.MasterFN));
+    init_cond.master_fp = fullfile(buffer.folder,buffer.name);
+    init_cond.exp_pos = temp.exp_pos;
+    init_cond.n_of_data = temp.n_of_data;
+
+    % get mask file name and file path
     for Idx = 1:4
-        ManualMaskFfL{Idx} = ManualMaskFF;
-        ManualMaskFnL{Idx} = Value{3+Idx};
+        ManualMaskFfL{Idx} = DataFF;
+        ManualMaskFnL{Idx} = Value{2+Idx};
         if strcmpi(ManualMaskFnL{Idx},'None')
             ManualMaskFnL{Idx} = [];
         end
@@ -151,39 +110,23 @@ function init_cond = get_config(ConfigFP)
             init_cond.manual_mask_fp{loopidx} = fullfile(ManualMaskFfL{ManualMaskActIdx(loopidx)}, ManualMaskFnL{ManualMaskActIdx(loopidx)});
         end
     end
-    
-    
-    %% get scan position file name and path
-    % get master file folder
-    ScanFP = Value{8};
-    % get master file name
-    ScanFN = Value{9};
-    
-    buffer = dir(fullfile(ScanFP,ScanFN));
-    init_cond.pos_record_fp = fullfile(buffer.folder,buffer.name);
-    
-    %% get prepared data files and iteration files path
-    init_cond.results_path = fullfile(Value{10});
-    if ~exist(init_cond.results_path,'dir')
-        mkdir(init_cond.results_path);
-    end
 
     %% get beam center x and y
-    beam_center_x = Value{11};
+    beam_center_x = Value{7};
     if strcmpi(beam_center_x,'Auto')
         beam_center_x = autoload_ExpStat(init_cond.master_fp,'beam_center_x');
     end
     init_cond.beam_center_x = round(beam_center_x);
     
 
-    beam_center_y = Value{12};
+    beam_center_y = Value{8};
     if strcmpi(beam_center_y,'Auto')
         beam_center_y = autoload_ExpStat(init_cond.master_fp,'beam_center_y');
     end
     init_cond.beam_center_y = round(beam_center_y);
     
     %% get wavelength
-    wavelength = Value{13};
+    wavelength = Value{9};
     if strcmpi(wavelength,'Auto')
         wavelength = autoload_ExpStat(init_cond.master_fp,'wavelength'); % [m]
     else
@@ -193,13 +136,13 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get sample to detector distance and detector pixel sizes
-    detector_distance = Value{14};
+    detector_distance = Value{10};
     if strcmpi(detector_distance,'Auto')
         detector_distance = autoload_ExpStat(init_cond.master_fp,'detector_distance'); % [m]
     end
     init_cond.detector_distance = detector_distance; % [m]
     
-    x_pixel_size = Value{15};
+    x_pixel_size = Value{11};
     if strcmpi(x_pixel_size,'Auto')
         x_pixel_size = autoload_ExpStat(init_cond.master_fp,'x_pixel_size'); % [m]
     else
@@ -207,7 +150,7 @@ function init_cond = get_config(ConfigFP)
     end
     init_cond.x_pixel_size = x_pixel_size; % [m]
     
-    y_pixel_size = Value{16};
+    y_pixel_size = Value{12};
     if strcmpi(y_pixel_size,'Auto')
         y_pixel_size = autoload_ExpStat(init_cond.master_fp,'y_pixel_size'); % [m]
     else
@@ -220,7 +163,7 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get data clip size N*N
-    init_cond.rawdata_clip_size = Value{17};
+    init_cond.rawdata_clip_size = Value{13};
     if mod(init_cond.rawdata_clip_size,2) == 0
         init_cond.rawdata_clip_size = init_cond.rawdata_clip_size + 1;
     end
@@ -228,7 +171,7 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get using GPU setting
-    GPUDeviceNumber = Value{18};
+    GPUDeviceNumber = Value{14};
     if strcmpi(GPUDeviceNumber,'None')
         init_cond.using_GPU = 0;
     else
@@ -237,10 +180,10 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get probe range extend condition
-    init_cond.probe_extending_factor = Value{19};
+    init_cond.probe_extending_factor = Value{15};
 
     %% get random seed
-    if strcmpi(Value{20},'None')
+    if strcmpi(Value{16},'None')
         rng('shuffle')
         init_cond.rand_seed = round(rand*1E8);
     else
@@ -249,7 +192,7 @@ function init_cond = get_config(ConfigFP)
     end
     
     %% determine core
-    init_cond.core = Value{21};
+    init_cond.core = Value{17};
 end
 
 function ReturnValue = autoload_ExpStat(master_fp,Target)

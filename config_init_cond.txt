@@ -1,22 +1,18 @@
 Value                                                  % Discription
-/home/tsai.yw/gpfs_folder/raw data/20220905_spectro_pty/   % the folder of the master file
-*_54_master.h5                       % the file nmae of the master file
-/home/tsai.yw/gpfs_folder/raw data/20220905_spectro_pty/    % the folder of the mask files
-Mask_16M_42.csv                                               % the file name of the csv mask file (None for skipping)1
+/home/tsai.yw/UsersData/20240522/                   % the folder of the files
+Ptycho_20240522-scan_id-4591-primary.csv                            % the file name of the scan position file
+None                                            % the file name of the csv mask file (None for skipping)
 None                                                   % the file name of the csv mask file (None for skipping)        
 None                                                   % the file name of the csv mask file (None for skipping)
 None                                                   % the file name of the csv mask file (None for skipping)
-/home/tsai.yw/gpfs_folder/raw data/20220905_spectro_pty/    % the folder of the scan position file
-*-scan_id-250-primary.csv                             % the file name of the scan position file
-/home/tsai.yw/gpfs_folder/raw data/20220905_spectro_pty/54/  % the folder for saving section file
 Auto                                                   % beam center X (Auto for loading from the header in the master file)
 Auto                                                   % beam center Y (Auto for loading from the header in the master file)
 Auto                                                   % wavelength [A] (Auto for loading from the header in the master file)
-Auto                                                   % Sample to detector distance [m] (Auto for loading from the header in the master file)
+Auto                                                  % Sample to detector distance [m] (Auto for loading from the header in the master file)
 Auto                                                   % Detector X pixel size [um] (Auto for loading from the header in the master file)
-Auto                                                   % Detector Y pixel size [um] (Auto for loading from the header in the master file)
-500                                                   % Data clipping size
-3                                                      % arrage GPU device number (None for skipping)
-1                                                     % probe extending factor
-None                                                      % seed for random (None for random seed)
+Auto                                                   % Detector Y pixel size [um] (Auto for loading from the header in the master file)                                                   % Data clipping size
+1000                                                   % Data clipping size
+1                                                      % arrage GPU device number (None for skipping)
+0.5                                                      % probe extending factor
+None                                                       % seed for random (None for random seed)
 rPIE                                                      % core: ePIE, rPIE, mPIE, ML, DM
