@@ -17,8 +17,10 @@ function [propagated_probe,propagated_x_axis,propagated_y_axis]  = propagate_pro
     xp_res = abs(lambda*z/U_measured_xi_size/xi_axis_res);
     yp_res = abs(lambda*z/U_measured_eta_size/eta_axis_res);
     [U_propagated_yp_size,U_propagated_xp_size] = size(probe(:,:,1));
-    xp_axis = ((1:U_propagated_xp_size)-round(U_propagated_xp_size/2))*xp_res;
-    yp_axis = ((1:U_propagated_yp_size)-round(U_propagated_yp_size/2))*yp_res;
+    %xp_axis = ((1:U_propagated_xp_size)-round(U_propagated_xp_size/2))*xp_res;
+    %yp_axis = ((1:U_propagated_yp_size)-round(U_propagated_yp_size/2))*yp_res;
+    xp_axis = xi_axis/xi_axis_res*xp_res;
+    yp_axis = eta_axis/eta_axis_res*yp_res;    
     [xp,yp] = meshgrid(xp_axis,yp_axis);
     
     % data prepare for GPU case
