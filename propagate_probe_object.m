@@ -16,8 +16,8 @@ function propagated_probe_info = propagate_probe_object(z,origin_probe_info)
     
     xi_axis =  origin_probe_info.real_space_xaxis;
     eta_axis =  origin_probe_info.real_space_yaxis';
-    xi_axis_res = abs(xi_axis(2)-xi_axis(1));
-    eta_axis_res = abs(eta_axis(2)-eta_axis(1));
+    xi_axis_res = origin_probe_info.x_res;
+    eta_axis_res = origin_probe_info.y_res;
     [xi,eta] = meshgrid(xi_axis,eta_axis); %[m]
     
     [U_measured_eta_size,U_measured_xi_size] = size(origin_probe_info.real_space(:,:,1));
