@@ -1,4 +1,4 @@
-function init_cond = gen_init_cond(ConfigFP)  
+function init_cond = gen_init_cond(ConfigFP)    
     init_cond = get_config(ConfigFP);
   
     master_fp = init_cond.master_fp;
@@ -41,6 +41,9 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
     if isempty(MasterFPattern)
         MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig16m_file_file_write_name_pattern'),VariableDescriptions));
     end
+    if isempty(MasterFPattern)
+        MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig4m_file_file_write_name_pattern'),VariableDescriptions));
+    end
     xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableDescriptions));
     zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableDescriptions));
     MasterFPattern_variablename = table_temp.Properties.VariableNames{MasterFPattern};
@@ -75,6 +78,8 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
 end
 
 function init_cond = get_config(ConfigFP)
+    [projectDir,configFn,configExt] = fileparts(ConfigFP);
+    init_cond.projectFF = projectDir;
     Temp = readcell(ConfigFP);
     Temp(1,:) = []; % remove header
     Value = Temp(:,1); Discription = Temp(:,2);

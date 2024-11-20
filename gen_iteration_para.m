@@ -1,4 +1,5 @@
-function iteration_para = gen_iteration_para(init_cond,measurement_info,object_info,probe_info,iteration_configFP)
+function iteration_para = gen_iteration_para(init_cond,measurement_info,object_info,probe_info)
+    iteration_configFP = fullfile(init_cond.projectFF,'config_iteration.txt');
     iteration_para.FinishedRun = 0;
     iteration_para.chi2 = single(zeros(500000,1));
     

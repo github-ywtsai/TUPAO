@@ -1,4 +1,5 @@
-function probe_info = gen_probe_info(init_cond,probeconfigFP)
+function probe_info = gen_probe_info(init_cond)
+    probeconfigFP = fullfile(init_cond.projectFF,'config_probe.txt');
     rng(init_cond.rand_seed + 2)
     ProbeConf = get_ProbeConf(init_cond,probeconfigFP);
 
