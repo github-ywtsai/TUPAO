@@ -6,7 +6,7 @@ function fouriercorr(img1,img2,pixel_size)
     % ---Compute FSC and threshold---
     % default value
     snrt = [0.2071,0.5]; % 0.2071 for 1/2 bit and 0.5 for 1 bit.
-    ring_thick = 5;
+    ring_thick = 3;
     rad_apod = 60;
     axial_apod = 20;
     % Apodization
@@ -55,6 +55,27 @@ function fouriercorr(img1,img2,pixel_size)
         T(i,:) = Tnum ./ Tden;
     end
 
+    % determine resolution
+    difference = FSC-T;
+    s = log10(pixel_size);
+    if     s < -6
+        unit_name = 'nm';
+        s = 1e9;
+    elseif s < -3
+        unit_name = 'um';
+        s = 1e6;
+    elseif s < 0
+        unit_name = 'mm';
+        s = 1e3;
+    else
+        unit_name = 'm';
+        s = 1;
+    end
+    for ii = 1:length(snrt)
+        cut_index = find(difference(ii,:)<0,1);
+        resolution = pixel_size * s / (f(cut_index)/fnyquist);
+        fprintf('SNRT = %f, resolution = %.2f %s\n',snrt(ii),resolution,unit_name);
+    end
     
     FSCPlot(f,fnyquist,FSC,T,pixel_size)
     
