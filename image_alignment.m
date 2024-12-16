@@ -17,3 +17,5 @@ function [OutputData1, OutputData2] = image_alignment(DataInput1,DataInput2)
     
     OutputData1.object_info.real_space = aligned_img1;
     OutputData2.object_info.real_space = aligned_img2;
+    OutputData2.object_info.real_space_xaxis = OutputData1.object_info.real_space_xaxis;
+    OutputData2.object_info.real_space_yaxis = OutputData1.object_info.real_space_yaxis;
