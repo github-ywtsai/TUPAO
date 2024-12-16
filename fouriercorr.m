@@ -2,7 +2,11 @@
 % which is created by Julio Cesar da Silva (jdasilva@esrf.fr) and modified
 % by Vincent Favre-Nicolin (favre@esrf.fr) at ESRF.
 
-function fouriercorr(img1,img2,pixel_size)
+function fouriercorr(ptycho_package1,ptycho_package2,row_ROI,col_ROI)
+    % ROI in pixel [row_range,col_range]
+    pixel_size = ptycho_package1.object_info.x_res;
+    img1 = ptycho_package1.object_info.real_space(row_ROI,col_ROI);
+    img2 = ptycho_package2.object_info.real_space(row_ROI,col_ROI);
     % ---Compute FSC and threshold---
     % default value
     snrt = [0.2071,0.5]; % 0.2071 for 1/2 bit and 0.5 for 1 bit.
