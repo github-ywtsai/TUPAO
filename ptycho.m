@@ -50,15 +50,23 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
         
         %% check beta and position correction and itnesity normlization start point
         % smooth part
-        if mod(CurrentRun,20)==0 && CurrentRun<200
+        if CurrentRun == 15
             object_info.real_space = conv2(object_info.real_space,ones(10,10),'same')/sum(ones(10,10),'all');
         end
         
-%         if mod(CurrentRun,25)==0 && CurrentRun<200
-%             for probe_sn = 1:probe_info.Mp
-%                 probe_info.real_space(:,:,probe_sn) = conv2(probe_info.real_space(:,:,probe_sn),rand(3,3),'same');
-%             end
-%         end
+        if CurrentRun == -1
+             for probe_sn = 1:probe_info.Mp
+                 probe_info.real_space(:,:,probe_sn) = conv2(probe_info.real_space(:,:,probe_sn),ones(3,3),'same')/sum(ones(3,3),'all');
+             end
+        end
+        
+        %if or(CurrentRun == 40,CurrentRun == 120) && probe_info.Mp > 1
+        %     for probe_sn = 2:probe_info.Mp
+        %         probe_info.real_space(:,:,probe_sn) = probe_info.real_space(:,:,probe_sn)*1E-6;
+        %     end
+        %     probe_info = normalize_probe(probe_info,measurement_info);
+        %end
+        
         
         %PC parts
         if iteration_para.pos_correction_status == 1
@@ -79,6 +87,8 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
             [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
         elseif strcmpi(init_cond.core,'rPIE') 
             [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
+        elseif strcmpi(init_cond.core,'test_function') 
+            [updated_object,updated_probe,chi2_sum] = test_function(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
         end
         [~,n_of_interesting_data] = size(iteration_para.interesting_table);
         iteration_para.chi2(CurrentRun) = chi2_sum/n_of_interesting_data;
@@ -105,7 +115,7 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
         
         %% plot parts
         if iteration_para.draw_results
-            imagesc(axes_obj,object_info.real_space_xaxis,object_info.real_space_yaxis,angle(object_info.real_space));axes_obj.DataAspectRatio = [1,1,1];
+            imagesc(axes_obj,object_info.real_space_xaxis,object_info.real_space_yaxis,angle(object_info.real_space));colorbar;axes_obj.DataAspectRatio = [1,1,1];colormap gray;
             imagesc(axes_probe,probe_info.real_space_xaxis,probe_info.real_space_yaxis,abs(probe_info.real_space(:,:,1)));axes_probe.DataAspectRatio = [1,1,1];
             loglog(axes_chi2, iteration_para.chi2);
             drawnow
