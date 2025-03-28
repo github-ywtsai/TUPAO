@@ -101,6 +101,9 @@ function ptyshow()
     axis(handles.axes_obj_real,'image');
     axis(handles.axes_obj_abs,'image');
     axis(handles.axes_obj_phase,'image');
+    set(handles.axes_obj_real,'Colormap',gray);
+    set(handles.axes_obj_abs,'Colormap',gray);
+    set(handles.axes_obj_phase,'Colormap',gray);
 
     linkaxes([handles.axes_obj_real,handles.axes_obj_abs,handles.axes_obj_phase],'xy');
     
