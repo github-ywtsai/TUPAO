@@ -35,25 +35,19 @@ end
 % exp_pos = [(exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen)*-1,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
 
 function output = get_exp_cond_bluesky(exp_cond_record_fp)
-    table_temp = readtable(exp_cond_record_fp,'Delimiter',{' ',','});
-    VariableDescriptions = table_temp.Properties.VariableDescriptions;
-    MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig1m_file_file_write_name_pattern'),VariableDescriptions));
-    if isempty(MasterFPattern)
-        MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig16m_file_file_write_name_pattern'),VariableDescriptions));
-    end
-    if isempty(MasterFPattern)
-        MasterFPattern = find(cellfun(@(X)strcmpi(X,'eig4m_file_file_write_name_pattern'),VariableDescriptions));
-    end
-    xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableDescriptions));
-    zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableDescriptions));
-    MasterFPattern_variablename = table_temp.Properties.VariableNames{MasterFPattern};
+    table_temp = readtable(exp_cond_record_fp,'Delimiter',{' ',','},'VariableNamingRule','preserve');
+    VariableNames = table_temp.Properties.VariableNames;
+    MasterFPattern_idx = find(cellfun(@(x) ~isempty(regexpi(x,'eig\d*m_file_file_write_name_pattern')),VariableNames));
+    xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableNames));
+    zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableNames));
+    MasterFPattern = table_temp.Properties.VariableNames{MasterFPattern_idx};
     xaxis_variablename = table_temp.Properties.VariableNames{xidx};
     zaxis_variablename = table_temp.Properties.VariableNames{zidx};
-    cmd = sprintf('masterfilepattern = table_temp.%s;',MasterFPattern_variablename);
+    cmd = sprintf('masterfilepattern = table_temp.%s;',MasterFPattern);
     eval(cmd);
-    cmd = sprintf('xpos = table_temp.%s;',xaxis_variablename);
+    cmd = sprintf('xpos = table_temp.(''%s'');',xaxis_variablename);
     eval(cmd);
-    cmd = sprintf('zpos = table_temp.%s;',zaxis_variablename);
+    cmd = sprintf('zpos = table_temp.(''%s'');',zaxis_variablename);
     eval(cmd);
     MasterFN = sprintf('%s_master.h5',masterfilepattern{1});
     exp_pos_rbv_z_x = [zpos,xpos];
@@ -87,7 +81,7 @@ function init_cond = get_config(ConfigFP)
     % get  file folder
     DataFF = Value{1};
     % get expeirmentcal condition file name and file path
-    ScanFN = Value{2};   
+    ScanFN = Value{2};
     buffer = dir(fullfile(DataFF,ScanFN));
     init_cond.exp_cond_record_fp = fullfile(buffer.folder,buffer.name);
     
