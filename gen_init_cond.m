@@ -186,7 +186,7 @@ function init_cond = get_config(ConfigFP)
         rng('shuffle')
         init_cond.rand_seed = round(rand*1E8);
     else
-        init_cond.rand_seed = Value{20};
+        init_cond.rand_seed = Value{16};
         rng(init_cond.rand_seed)
     end
     
