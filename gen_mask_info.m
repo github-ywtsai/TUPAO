@@ -5,6 +5,7 @@ function mask_info = gen_mask_info(init_cond)
     % fprintf('\nLoading mask from detector...\t')
     mask_info.pixel_mask = single(transpose(h5read(master_fp,'/entry/instrument/detector/detectorSpecific/pixel_mask')));
     mask_info.pixel_mask(mask_info.pixel_mask ~= 0) = 1;
+    %mask_info.pixel_mask = zeros(init_cond.y_pixels_in_detector,init_cond.x_pixels_in_detector);
     % fprintf('Done.\n')
     
     % fprintf('\nLoading manual mask...\t')

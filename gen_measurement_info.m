@@ -70,7 +70,7 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
 
         % check saturated data
         %GUIh.Alarm.mfig.UserData.BadDataStop = 0;
-        if(sum(data >= 1E7,'all')~= 0)
+        if(sum(data >= Inf,'all')~= 0)
             %GUIh.Alarm.mfig.UserData.BadDataStop = 1;
             %mfig_xstart = GUIh.MF.mfig.Position(1);
             %mfig_ystart = GUIh.MF.mfig.Position(2);

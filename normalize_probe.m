@@ -18,4 +18,4 @@ main_probe_on_detector_total_count = sum(abs(main_probe_on_detector).*overall_ro
 ratio = flat_diffraction_pattern_amp_total_count/main_probe_on_detector_total_count;
 
 
-probe_info.real_space = probe_info.real_space*ratio;
+probe_info.real_space(:,:,1) = probe_info.real_space(:,:,1)*ratio;
