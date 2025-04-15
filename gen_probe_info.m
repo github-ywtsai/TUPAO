@@ -6,13 +6,15 @@ function probe_info = gen_probe_info(init_cond)
     % generate empty probe   
     real_space = zeros(ProbeConf.clip_size,ProbeConf.clip_size,ProbeConf.Mp);
     
-    fprintf('Simulating probe...')
     switch ProbeConf.ProbGenMode
         case 'Gaussian'
+            disp('Generating probe using Gaussian profile...')
             probe_temp = generate_probe_from_Gaussian(ProbeConf);
         case 'Zone Plate'
+            disp('Generating probe using simulation of zone plate...')
             probe_temp = generate_probe_from_ZonePlate(ProbeConf);
         case 'Adapt from another result'
+            disp('Generating probe from ptychography results...')
             probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf);
     end
     fprintf('\tDone.\n')
@@ -271,6 +273,8 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     probe_temp = zeros(clip_size,clip_size);
     
     if ~exist(ProbeConf.RefProbeFP,'File')
+        disp('!!!-----WARNING----!!!')
+        disp('!!!-----Section file for probe adapting doesn''t exist.----!!!')
         return
     end
     Temp = load(ProbeConf.RefProbeFP,'probe_info');
@@ -317,15 +321,13 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     end
     
     % clear area around center
-    %{
-    if ProbeConf.ClearArea
-        boundary = (clip_size-1)/2;
-        [X,Y] = meshgrid(-boundary:boundary,-boundary:boundary);
-        w_pixel = ProbeConf.ClearAreaDiameter/x_res; % width for gaussian in pixel
-        Gaussian = exp(-0.5*(X/w_pixel).^2) .* exp(-0.5*(Y/w_pixel).^2);
-        probe_temp = probe_temp.*Gaussian;
-    end
-    %}
+    
+    boundary = (clip_size-1)/2;
+    [X,Y] = meshgrid(-boundary:boundary,-boundary:boundary);
+    w_pixel = boundary/x_res; % width for gaussian in pixel
+    Gaussian = exp(-0.5*(X/w_pixel).^2) .* exp(-0.5*(Y/w_pixel).^2);
+    probe_temp = probe_temp.*Gaussian;
+    
 end
 
 function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
