@@ -1,13 +1,25 @@
 function updated_pos_correct_pixel = position_correction(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)
     
+    % new version, only using 1st mode of probe for position collection.
+    probe_info_temp = probe_info;
+    if probe_info_temp.Mp > 1
+        for probe_sn = 2:probe_info_temp.Mp
+            probe_info_temp.real_space(:,:,probe_sn) = probe_info_temp.real_space(:,:,probe_sn)*1E-6;
+        end
+        probe_info_temp = normalize_probe(probe_info_temp,measurement_info);
+    end
+    probe = probe_info_temp.real_space;
+    
+    % olde version, using all probe for position correction
+    % probe = probe_info.real_space;
     
     object = object_info.real_space;
-    probe = probe_info.real_space;
     updated_pos_correct_pixel = zeros(init_cond.n_of_data,2);
     individual_mask = measurement_info.individual_mask;
     individual_mask_active_area = measurement_info.individual_mask_active_area;
     measured_amp_max = measurement_info.measured_amp_max;
     
+
     
     % create position extend matrix - mesh
     %{
