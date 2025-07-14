@@ -182,7 +182,8 @@ function main_probe = generate_probe_from_ZonePlate(ProbeConf)
     
     exitwave = zp.*cs;
     
-    %% gen probe
+    %{
+    %% gen probe old version, before 2025/07/10
     % gen on traget probe
     propagating_distance = f + ProbeConf.ZoneplateOffFocal;
     [probe_temp,probe_temp_x_axis,probe_temp_y_axis] = propagate_probe(propagating_distance,exitwave,lambda,x_axis,y_axis);
@@ -209,7 +210,51 @@ function main_probe = generate_probe_from_ZonePlate(ProbeConf)
     col_ind = reshape(col_ind,ProbeConf.clip_size,ProbeConf.clip_size)-cen_ind;
     blur_matrix = exp(-row_ind.^2/2/pi/blur_width^2) .* exp(-col_ind.^2/2/pi/blur_width^2);
     main_probe = conv2(main_probe,blur_matrix,'same');
+    %}
+    
+    %% gen probe new version, after 2025/07/10
+    propagating_distance = f + ProbeConf.ZoneplateOffFocal;
+    main_probe = propagating_rescaling_wavefield(propagating_distance,exitwave,lambda,x_axis,y_axis,ProbeConf.x_res,ProbeConf.clip_size);
 end
+
+function propagted_and_matched_probe = propagating_rescaling_wavefield(propagating_distance,wavefield,lambda,x_axis,y_axis,target_res,target_size)
+% This function is designed for the probe propagating during the generation
+% of probes. The input is the the propagating distance and the wavefield.
+% After the wavefield propageted, the resolution and field of view is
+% changed. Then, using interp method to math the pixel size of the
+% wavefiled to the target size and clip it to the purper size.
+% The propagating_distance is the propagating distance of the wavefield in
+% meter. The wavefield is the candidate for the propagating. The
+% lambda,x_axis, y_axis are the related information of the wavefield. the
+% target resolution and the target size are the pixel size and clip size of
+% the propagated wavefield.
+    [pix_num,~] = size(wavefield);
+    % gen on traget probe
+    [probe_temp,probe_temp_x_axis,probe_temp_y_axis] = propagate_probe(propagating_distance,wavefield,lambda,x_axis,y_axis);
+    % rescale on target probe
+    probe_temp_res = abs(probe_temp_x_axis(2) - probe_temp_x_axis(1));
+    rescale_factor = probe_temp_res/target_res;
+    rescale_pix_num = round(pix_num*rescale_factor);
+    if mod(rescale_pix_num,2) == 0
+        rescale_pix_num = rescale_pix_num + 1;
+    end
+    probe_temp_rescale = imresize(probe_temp,[rescale_pix_num,rescale_pix_num]);
+    
+    rescale_cen = (rescale_pix_num + 1)/2;
+    extend_range = (target_size-1)/2;
+    clip_range = rescale_cen-extend_range:rescale_cen+extend_range;
+    main_probe = probe_temp_rescale(clip_range,clip_range);
+    
+    % blur probe
+    blur_width = round(target_size/200);
+    [row_ind,col_ind] = find(ones(target_size,target_size));
+    cen_ind = (target_size+1)/2;
+    row_ind = reshape(row_ind,target_size,target_size)-cen_ind;
+    col_ind = reshape(col_ind,target_size,target_size)-cen_ind;
+    blur_matrix = exp(-row_ind.^2/2/pi/blur_width^2) .* exp(-col_ind.^2/2/pi/blur_width^2);
+    propagted_and_matched_probe = conv2(main_probe,blur_matrix,'same');
+end
+
     
 
 function probe_temp = generate_probe_from_ZonePlate_old(ProbeConf)    
@@ -273,8 +318,7 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     probe_temp = zeros(clip_size,clip_size);
     
     if ~exist(ProbeConf.RefProbeFP,'File')
-        disp('!!!-----WARNING----!!!')
-        disp('!!!-----Section file for probe adapting doesn''t exist.----!!!')
+        error('!!!-----Section file for probe adapting doesn''t exist.----!!!')
         return
     end
     Temp = load(ProbeConf.RefProbeFP,'probe_info');
@@ -288,6 +332,12 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     AdaptProbeYAxis = AdaptProbeInfo.real_space_yaxis;
     AdaptProbeXRes = AdaptProbeInfo.x_res;
     AdaptProbeYRes = AdaptProbeInfo.y_res;
+
+    if abs(ProbeConf.AdaptPropagating) > 50E-6
+        AdaptProbe = propagating_rescaling_wavefield(ProbeConf.AdaptPropagating,AdaptProbe,wavelength,AdaptProbeXAxis,AdaptProbeYAxis,AdaptProbeXRes,clip_size);
+    else
+        fprintf('!!!-----Ignore propagating, the propagating distance is small than 100 um----!!!')
+    end
     
     ScalingRatio = x_res/AdaptProbeXRes;
     
@@ -359,11 +409,12 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     ProbeConf.RefProbeFP = Value{8};
     ProbeConf.AdaptProbeMode = Value{9};
     ProbeConf.AdapPosCorr = logical(Value{10});
+    ProbeConf.AdaptPropagating = Value{11}*1E-6; % from um to meter
     
     %% probe upstream constrain
-    ProbeConf.UpStreamConstrain = logical(Value{11});
-    ProbeConf.ApertureDist = Value{12}; % in meter
-    ProbeConf.ApertureSize = Value{13}*1E-6; % from um to meter
+    ProbeConf.UpStreamConstrain = logical(Value{12});
+    ProbeConf.ApertureDist = Value{13}; % in meter
+    ProbeConf.ApertureSize = Value{14}*1E-6; % from um to meter
     
     clip_size = init_cond.effective_clip_size;
     n_of_data = init_cond.n_of_data;
