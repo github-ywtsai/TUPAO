@@ -1,0 +1,18 @@
+Value                                                  % Discription
+/home/tsai.yw/UsersData/20250701/                   % the folder of the files
+250701_ptycho-scan_id-8430-primary.csv                            % the file name of the scan position file
+None                                            % the file name of the csv mask file (None for skipping)
+None                                                   % the file name of the csv mask file (None for skipping)        
+None                                                   % the file name of the csv mask file (None for skipping)
+None                                                   % the file name of the csv mask file (None for skipping)
+Auto                                                   % beam center X (Auto for loading from the header in the master file)
+Auto                                                   % beam center Y (Auto for loading from the header in the master file)
+Auto                                                   % wavelength [A] (Auto for loading from the header in the master file)
+Auto                                                  % Sample to detector distance [m] (Auto for loading from the header in the master file)
+Auto                                                   % Detector X pixel size [um] (Auto for loading from the header in the master file)
+Auto                                                   % Detector Y pixel size [um] (Auto for loading from the header in the master file)                                                   % Data clipping size
+1000                                                    % Data clipping size
+6                                                      % arrage GPU device number (None for skipping)
+0.5                                                      % probe extending factor
+None                                                       % seed for random (None for random seed)
+rPIE                                                      % core: ePIE, rPIE, mPIE, ML, DM
