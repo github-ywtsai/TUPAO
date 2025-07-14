@@ -75,11 +75,11 @@ function fouriercorr(ptycho_package1,ptycho_package2,row_ROI,col_ROI)
         unit_name = 'm';
         s = 1;
     end
-    for ii = 1:length(snrt)
-        cut_index = find(difference(ii,:)<0,1);
-        resolution = pixel_size * s / (f(cut_index)/fnyquist);
-        fprintf('SNRT = %f, resolution = %.2f %s\n',snrt(ii),resolution,unit_name);
-    end
+   for ii = 1:length(snrt)
+       cut_index = find(difference(ii,:)<0,1);
+       resolution = pixel_size * s / (f(cut_index)/fnyquist);
+       fprintf('SNRT = %f, resolution = %.2f %s\n',snrt(ii),resolution,unit_name);
+   end
     
     FSCPlot(f,fnyquist,FSC,T,pixel_size)
     
