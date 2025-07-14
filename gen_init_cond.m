@@ -61,12 +61,17 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
 
     exp_pos_rbv_z_cen = (exp_pos_rbv_z_max + exp_pos_rbv_z_min)/2;
     exp_pos_rbv_x_cen = (exp_pos_rbv_x_max + exp_pos_rbv_x_min)/2;
-
+    
+    % in TPS 25A2 and SP8 12XU
+    % add - on z an + on x
+    z_direction_modification = -1; % for TPS 25A2
+    x_direction_modification = 1; % for TPS 25A2
     rel_exp_pos_rbv_z_x = [exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
     n_exp_pos = size(rel_exp_pos_rbv_z_x,1);
-    redirection_factor = [-1*ones(n_exp_pos,1),ones(n_exp_pos,1)];
-    exp_pos = rel_exp_pos_rbv_z_x.* redirection_factor;
+    exp_pos = rel_exp_pos_rbv_z_x.* [z_direction_modification*ones(n_exp_pos,1),x_direction_modification*ones(n_exp_pos,1)];
+    exp_pos_cen = [z_direction_modification*exp_pos_rbv_z_cen,x_direction_modification*exp_pos_rbv_x_cen];
     output.exp_pos = exp_pos*1E-6; % convert from um to m
+    output.exp_pos_cen = exp_pos_cen*1E-6; % convert from um to m
     [output.n_of_data, ~] = size(exp_pos);
     output.MasterFN = MasterFN;
 end
