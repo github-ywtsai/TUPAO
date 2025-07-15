@@ -25,7 +25,7 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     link_file_list = cell(n_of_link,1);
     link_object_list = cell(n_of_link,1);
     link_index = cell(n_of_link,1);
-    fprintf('Data preparation in progressing...\t');
+    fprintf('Data preparation in progressing...\n');
     n_of_data = init_cond.n_of_data;
     measured_amp = cell(n_of_data,1);
     bad_data_mask = cell(n_of_data,1);
@@ -51,7 +51,9 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     %GUIh.PlotArea.tabgp.SelectedTab =  GUIh.PlotArea.Data_tab;
     %GUIh.PlotArea.DataSn_editfield.ValueDisplayFormat = sprintf('%%d/%d',n_of_data);
     for i = 1:n_of_data
-        fprintf('Data Sheet %d/%d...\t',i,n_of_data);
+        if mod(i,20) == 0 || i == n_of_data
+            fprintf('Data Sheet %d/%d...\n',i,n_of_data);
+        end
         for j = 1 : n_of_link
             if i >= link_index{j}(1) && i<= link_index{j}(2)
                 target_file_sn = j;
@@ -97,8 +99,6 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
         %title(GUIh.PlotArea.Data_axes,sprintf('Raw data max. = %.1f',max(data,[],'all')))
         %axis(GUIh.PlotArea.Data_axes,'image')
         %drawnow
-        
-        fprintf('Done.\n');
     end
     
     % convert cell to matrix for speedup when GPU applied

@@ -91,6 +91,7 @@ function init_cond = get_config(config_tables)
     buffer = dir(fullfile(DataFF,temp.MasterFN));
     init_cond.master_fp = fullfile(buffer.folder,buffer.name);
     init_cond.exp_pos = temp.exp_pos;
+    init_cond.exp_pos_cen = temp.exp_pos_cen;
     init_cond.n_of_data = temp.n_of_data;
 
     % get mask file name and file path
