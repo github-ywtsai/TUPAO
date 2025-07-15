@@ -1,5 +1,5 @@
 function iteration_para = gen_iteration_para(init_cond,measurement_info,object_info,probe_info)
-    iteration_configFP = fullfile(init_cond.projectFF,'config_iteration.txt');
+    config_iteration_table = init_cond.config_tables.config_iteration_table;
     iteration_para.FinishedRun = 0;
     iteration_para.chi2 = single(zeros(500000,1));
     
@@ -9,26 +9,21 @@ function iteration_para = gen_iteration_para(init_cond,measurement_info,object_i
     iteration_para.pause_sign = 0;
     iteration_para.stop_sign = 0;
     
-    
-    Temp = readcell(iteration_configFP);
-    Temp(1,:) = []; % remove header
-    Value = Temp(:,1); Discription = Temp(:,2);
-    
-    iteration_para.max_iteration_num = Value{1};
-    iteration_para.saveing_section_file_peroid = Value{2};
+    iteration_para.max_iteration_num = config_iteration_table{'max_iteration','Value'}{1};
+    iteration_para.saveing_section_file_peroid = config_iteration_table{'save_results_period','Value'}{1};
     
 
-    iteration_para.alpha = Value{3};
+    iteration_para.alpha = config_iteration_table{'alpha_object_update','Value'}{1};
     iteration_para.alpha_current = 0;
 
-    iteration_para.beta_start_pt = Value{4};
-    iteration_para.beta = Value{5};
+    iteration_para.beta_start_pt = config_iteration_table{'probe_update_start','Value'}{1};
+    iteration_para.beta = config_iteration_table{'beta_probe_update','Value'}{1};
     iteration_para.beta_current = 0;
     
 
-    iteration_para.real_space_constraint_start_pt = Value{6};
+    iteration_para.real_space_constraint_start_pt = config_iteration_table{'real_space_constraint_start','Value'}{1};
     iteration_para.real_space_constraint_period = 1;
-    iteration_para.real_space_constraint_factor = Value{7};
+    iteration_para.real_space_constraint_factor = config_iteration_table{'real_space_constraint_factor','Value'}{1};
     
     iteration_para.interesting_table = 1:init_cond.n_of_data;
     %{
@@ -42,17 +37,17 @@ function iteration_para = gen_iteration_para(init_cond,measurement_info,object_i
     %}
     
 
-    iteration_para.pos_corr_start_pt = Value{8};
-    iteration_para.pos_corr_period = Value{9};
-    iteration_para.pos_corr_extend_pts = Value{10};
-    iteration_para.pos_corr_extend_range = round(Value{11}/(object_info.x_res*1E9));
+    iteration_para.pos_corr_start_pt = config_iteration_table{'pos_corr_start','Value'}{1};
+    iteration_para.pos_corr_period = config_iteration_table{'pos_corr_period','Value'}{1};
+    iteration_para.pos_corr_extend_pts = config_iteration_table{'pos_corr_points','Value'}{1};
+    iteration_para.pos_corr_extend_range = config_iteration_table{'pos_corr_range_nm','Value'}{1};
     
 
-    iteration_para.probe_deny_area_factor = Value{12};
-    iteration_para.probe_deny_reducing_ratio = Value{13};
+    iteration_para.probe_deny_area_factor = config_iteration_table{'probe_deny_area_factor','Value'}{1};
+    iteration_para.probe_deny_reducing_ratio = config_iteration_table{'probe_deny_reduce_ratio','Value'}{1};
     iteration_para.probe_deny_mask = gen_probe_deny_mask(init_cond,iteration_para.probe_deny_area_factor,iteration_para.probe_deny_reducing_ratio);
     
-    iteration_para.draw_results = Value{14};
+    iteration_para.draw_results = config_iteration_table{'draw_results_period','Value'}{1};
 end
 
 function probe_deny_mask = gen_probe_deny_mask(init_cond,probe_deny_area_factor,probe_deny_reducing_ratio)

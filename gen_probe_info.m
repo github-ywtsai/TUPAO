@@ -1,7 +1,5 @@
 function probe_info = gen_probe_info(init_cond)
-    probeconfigFP = fullfile(init_cond.projectFF,'config_probe.txt');
-    rng(init_cond.rand_seed + 2)
-    ProbeConf = get_ProbeConf(init_cond,probeconfigFP);
+    ProbeConf = get_ProbeConf(init_cond);
 
     % generate empty probe   
     real_space = zeros(ProbeConf.clip_size,ProbeConf.clip_size,ProbeConf.Mp);
@@ -380,14 +378,12 @@ function probe_temp = generate_probe_from_sectionfile(init_cond,ProbeConf)
     
 end
 
-function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
-    Temp = readcell(probeconfigFP);
-    Temp(1,:) = []; % remove header
-    Value = Temp(:,1); Discription = Temp(:,2);
-    
-    ProbeConf.photon_flux = Value{1};
-    ProbeConf.Mp = Value{2};
-    Method = Value{3};
+function ProbeConf = get_ProbeConf(init_cond)
+    config_probe_table = init_cond.config_tables.config_probe_table;
+
+    ProbeConf.photon_flux = config_probe_table{'photon_flux','Value'}{1};
+    ProbeConf.Mp = config_probe_table{'mixture_statue','Value'}{1};
+    Method = config_probe_table{'probe_generate_method','Value'}{1};
     if strcmpi(Method,'G')
         Method = 'Gaussian';
     elseif strcmpi(Method,'Z')
@@ -398,23 +394,23 @@ function ProbeConf = get_ProbeConf(init_cond,probeconfigFP)
     ProbeConf.ProbGenMode = Method;
     
     %% Define by parameters (gaussian)
-    ProbeConf.GaussainBeamVSize = Value{4}*1E-6; % from um to m
-    ProbeConf.GaussainBeamHSize = Value{5}*1E-6; % from um to m
-    ProbeConf.GaussainBroken = logical(Value{6}); 
+    ProbeConf.GaussainBeamVSize = config_probe_table{'gaussian_ver_beamsize','Value'}{1}*1E-6; % from um to m
+    ProbeConf.GaussainBeamHSize = config_probe_table{'gaussian_hor_beamsize','Value'}{1}*1E-6; % from um to m
+    ProbeConf.GaussainBroken = logical(config_probe_table{'gaussian_broken_profile','Value'}{1}); 
     
     %% Define by parameters (zone plate)
-    ProbeConf.ZoneplateOffFocal = Value{7}*1E-6 ; % from um to m
+    ProbeConf.ZoneplateOffFocal = config_probe_table{'zoneplate_off_focal_um','Value'}{1}*1E-6 ; % from um to m
     
     %% Adapt from another result
-    ProbeConf.RefProbeFP = Value{8};
-    ProbeConf.AdaptProbeMode = Value{9};
-    ProbeConf.AdapPosCorr = logical(Value{10});
-    ProbeConf.AdaptPropagating = Value{11}*1E-6; % from um to meter
+    ProbeConf.RefProbeFP = config_probe_table{'adapt_section_file','Value'}{1};
+    ProbeConf.AdaptProbeMode = config_probe_table{'adapt_mode_index','Value'}{1};
+    ProbeConf.AdapPosCorr = logical(config_probe_table{'adapt_pos_corr_from_file','Value'}{1});
+    ProbeConf.AdaptPropagating = config_probe_table{'adapt_probe_propagating_um','Value'}{1}*1E-6; % from um to meter
     
     %% probe upstream constrain
-    ProbeConf.UpStreamConstrain = logical(Value{12});
-    ProbeConf.ApertureDist = Value{13}; % in meter
-    ProbeConf.ApertureSize = Value{14}*1E-6; % from um to meter
+    ProbeConf.UpStreamConstrain = logical(config_probe_table{'probe_upstream_constrain','Value'}{1});
+    ProbeConf.ApertureDist = logical(config_probe_table{'aperture_distance_m','Value'}{1}); % in meter
+    ProbeConf.ApertureSize = config_probe_table{'aperture_size_um','Value'}{1}*1E-6; % from um to meter
     
     clip_size = init_cond.effective_clip_size;
     n_of_data = init_cond.n_of_data;

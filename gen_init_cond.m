@@ -1,5 +1,5 @@
-function init_cond = gen_init_cond(ConfigFP)    
-    init_cond = get_config(ConfigFP);
+function init_cond = gen_init_cond(config_tables)    
+    init_cond = get_config(config_tables);
   
     master_fp = init_cond.master_fp;
     init_cond.data_precision = 'single'; % single or double
@@ -10,7 +10,6 @@ function init_cond = gen_init_cond(ConfigFP)
     init_cond.count_time = double(h5read(master_fp,'/entry/instrument/detector/count_time'));
 
     %% modify parameters when probe_extending_factor ~= 1
-
     if init_cond.probe_extending_factor ~= 1
         init_cond.effective_clip_size = (init_cond.effective_clip_size -1)* init_cond.probe_extending_factor + 1;
         init_cond.effective_x_pixel_size = init_cond.x_pixel_size * init_cond.rawdata_clip_size/init_cond.effective_clip_size;
@@ -76,17 +75,14 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
     output.MasterFN = MasterFN;
 end
 
-function init_cond = get_config(ConfigFP)
-    [projectDir,configFn,configExt] = fileparts(ConfigFP);
-    init_cond.projectFF = projectDir;
-    Temp = readcell(ConfigFP);
-    Temp(1,:) = []; % remove header
-    Value = Temp(:,1); Discription = Temp(:,2);
+function init_cond = get_config(config_tables)
+    init_cond.config_tables = config_tables;
+    config_init_cond_tables = config_tables.config_init_cond_table;
 
     % get  file folder
-    DataFF = Value{1};
+    DataFF = config_init_cond_tables{'folder_path','Value'}{1};
     % get expeirmentcal condition file name and file path
-    ScanFN = Value{2};
+    ScanFN = config_init_cond_tables{'scan_file_name','Value'}{1};
     buffer = dir(fullfile(DataFF,ScanFN));
     init_cond.exp_cond_record_fp = fullfile(buffer.folder,buffer.name);
     
@@ -100,7 +96,7 @@ function init_cond = get_config(ConfigFP)
     % get mask file name and file path
     for Idx = 1:4
         ManualMaskFfL{Idx} = DataFF;
-        ManualMaskFnL{Idx} = Value{2+Idx};
+        ManualMaskFnL{Idx} = config_init_cond_tables{sprintf('mask_file_%d',Idx),'Value'}{1};
         if strcmpi(ManualMaskFnL{Idx},'None')
             ManualMaskFnL{Idx} = [];
         end
@@ -116,21 +112,21 @@ function init_cond = get_config(ConfigFP)
     end
 
     %% get beam center x and y
-    beam_center_x = Value{7};
+    beam_center_x = config_init_cond_tables{'beam_center_X','Value'}{1};
     if strcmpi(beam_center_x,'Auto')
         beam_center_x = autoload_ExpStat(init_cond.master_fp,'beam_center_x');
     end
     init_cond.beam_center_x = round(beam_center_x);
     
 
-    beam_center_y = Value{8};
+    beam_center_y = config_init_cond_tables{'beam_center_Y','Value'}{1};
     if strcmpi(beam_center_y,'Auto')
         beam_center_y = autoload_ExpStat(init_cond.master_fp,'beam_center_y');
     end
     init_cond.beam_center_y = round(beam_center_y);
     
     %% get wavelength
-    wavelength = Value{9};
+    wavelength = config_init_cond_tables{'wavelength_A','Value'}{1};
     if strcmpi(wavelength,'Auto')
         wavelength = autoload_ExpStat(init_cond.master_fp,'wavelength'); % [m]
     else
@@ -140,13 +136,13 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get sample to detector distance and detector pixel sizes
-    detector_distance = Value{10};
+    detector_distance = config_init_cond_tables{'detector_distance_m','Value'}{1};
     if strcmpi(detector_distance,'Auto')
         detector_distance = autoload_ExpStat(init_cond.master_fp,'detector_distance'); % [m]
     end
     init_cond.detector_distance = detector_distance; % [m]
     
-    x_pixel_size = Value{11};
+    x_pixel_size = config_init_cond_tables{'pixel_size_X_um','Value'}{1};
     if strcmpi(x_pixel_size,'Auto')
         x_pixel_size = autoload_ExpStat(init_cond.master_fp,'x_pixel_size'); % [m]
     else
@@ -154,7 +150,7 @@ function init_cond = get_config(ConfigFP)
     end
     init_cond.x_pixel_size = x_pixel_size; % [m]
     
-    y_pixel_size = Value{12};
+    y_pixel_size = config_init_cond_tables{'pixel_size_Y_um','Value'}{1};
     if strcmpi(y_pixel_size,'Auto')
         y_pixel_size = autoload_ExpStat(init_cond.master_fp,'y_pixel_size'); % [m]
     else
@@ -167,7 +163,7 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get data clip size N*N
-    init_cond.rawdata_clip_size = Value{13};
+    init_cond.rawdata_clip_size = config_init_cond_tables{'data_clipping_size','Value'}{1};
     if mod(init_cond.rawdata_clip_size,2) == 0
         init_cond.rawdata_clip_size = init_cond.rawdata_clip_size + 1;
     end
@@ -175,7 +171,7 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get using GPU setting
-    GPUDeviceNumber = Value{14};
+    GPUDeviceNumber = config_init_cond_tables{'gpu_device_num','Value'}{1};
     if strcmpi(GPUDeviceNumber,'None')
         init_cond.using_GPU = 0;
     else
@@ -184,19 +180,19 @@ function init_cond = get_config(ConfigFP)
     
     
     %% get probe range extend condition
-    init_cond.probe_extending_factor = Value{15};
+    init_cond.probe_extending_factor = config_init_cond_tables{'probe_extend_factor','Value'}{1};
 
     %% get random seed
-    if strcmpi(Value{16},'None')
+    if strcmpi(config_init_cond_tables{'random_seed','Value'}{1},'None')
         rng('shuffle')
         init_cond.rand_seed = round(rand*1E8);
     else
-        init_cond.rand_seed = Value{16};
+        init_cond.rand_seed = config_init_cond_tables{'random_seed','Value'}{1};
         rng(init_cond.rand_seed)
     end
     
     %% determine core
-    init_cond.core = Value{17};
+    init_cond.core = config_init_cond_tables{'core_algorithm','Value'}{1};
 end
 
 function ReturnValue = autoload_ExpStat(master_fp,Target)
