@@ -1,5 +1,27 @@
 function [updated_object_info, updated_probe_info, updated_iteration_para] =  ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)    
-    
+    function idle_GPU_index = find_idle_GPU()
+        idle_GPU_index = [];
+        command = 'nvidia-smi pmon -c 1';
+        [status, cmdout] = system(command);
+        lines = strsplit(cmdout,'\n');
+        for ii = 1:length(lines)
+            line = strtrim(lines{ii});
+            if isempty(line) || startsWith(line,'#')
+                continue;
+            end
+            temp = strsplit(line,' ');
+            GPU_index = str2double(temp{1})+1;
+            name = temp{end};
+            if strcmp(name,'-')
+                idle_GPU_index = GPU_index;
+                fprintf('Find idle GPU %d.\n',idle_GPU_index);
+                break
+            end
+        end
+        if isempty(idle_GPU_index)
+            error('No idle GPU found.')
+        end
+    end
     %% prepare plot axes
     if iteration_para.draw_results
         fig = figure('position',[100,100,1300,500]);
@@ -11,8 +33,9 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
     
     %% arm GPU
     if init_cond.using_GPU
-    fprintf('Arrange GPU %d...',init_cond.using_GPU);
-    gpuDevice(init_cond.using_GPU);
+    idle_GPU_index = find_idle_GPU();
+    fprintf('Auto arrange GPU %d...',idle_GPU_index);
+    gpuDevice(idle_GPU_index);
     measured_amp = gpuArray(measurement_info.measured_amp);
     object_info.real_space = gpuArray(object_info.real_space);
     probe_info.real_space = gpuArray(probe_info.real_space);
