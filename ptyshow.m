@@ -27,18 +27,18 @@ function ptyshow()
     handles.tab_chi2 = uitab(handles.tabgroup,'Title','Chi^2');
     
     % Object part
-    handles.slider_obj_real_H = uicontrol(handles.tab_obj,'Units','Pixels','Position',[50 150 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'real_H'));
-    handles.slider_obj_real_L = uicontrol(handles.tab_obj,'Units','Pixels','Position',[50 100 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'real_L'));
+    %handles.slider_obj_real_H = uicontrol(handles.tab_obj,'Units','Pixels','Position',[50 150 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'real_H'));
+    %handles.slider_obj_real_L = uicontrol(handles.tab_obj,'Units','Pixels','Position',[50 100 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'real_L'));
     handles.slider_obj_abs_H = uicontrol(handles.tab_obj,'Units','Pixels','Position',[470 150 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'abs_H'));
     handles.slider_obj_abs_L = uicontrol(handles.tab_obj,'Units','Pixels','Position',[470 100 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'abs_L'));
     handles.slider_obj_phase_H = uicontrol(handles.tab_obj,'Units','Pixels','Position',[890 150 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'phase_H'));
     handles.slider_obj_phase_L = uicontrol(handles.tab_obj,'Units','Pixels','Position',[890 100 350 20],'Style','Slider','Callback',@(src,eventdata)change_show_range(src,eventdata,'phase_L'));
-    handles.axes_obj_real = axes(handles.tab_obj,'Units','Pixels','Position',[50 250 350 350]);
+    %handles.axes_obj_real = axes(handles.tab_obj,'Units','Pixels','Position',[50 250 350 350]);
     handles.axes_obj_abs = axes(handles.tab_obj,'Units','Pixels','Position',[470 250 350 350]);
     handles.axes_obj_phase = axes(handles.tab_obj,'Units','Pixels','Position',[890 250 350 350]);
     
-    handles.popupmenu_obj_real_colormap = uicontrol(handles.tab_obj,'units','pixels','position',[50 200 150 20],'style','popupmenu',...
-        'String',{'parula','jet','gray','bone','i-parula','i-jet','i-gray','i-bone'},'Value',1,'Callback',{@change_colormap,'obj_real'});
+    %handles.popupmenu_obj_real_colormap = uicontrol(handles.tab_obj,'units','pixels','position',[50 200 150 20],'style','popupmenu',...
+    %    'String',{'parula','jet','gray','bone','i-parula','i-jet','i-gray','i-bone'},'Value',1,'Callback',{@change_colormap,'obj_real'});
     handles.popupmenu_obj_abs_colormap = uicontrol(handles.tab_obj,'units','pixels','position',[470 200 150 20],'style','popupmenu',...
         'String',{'parula','jet','gray','bone','i-parula','i-jet','i-gray','i-bone'},'Value',1,'Callback',{@change_colormap,'obj_abs'});
     handles.popupmenu_obj_phase_colormap = uicontrol(handles.tab_obj,'units','pixels','position',[890 200 150 20],'style','popupmenu',...
@@ -52,8 +52,8 @@ function ptyshow()
             cmap = eval(cmap);
         end
         switch target
-            case 'obj_real'
-                colormap(handles.axes_obj_real,cmap);
+            %case 'obj_real'
+            %    colormap(handles.axes_obj_real,cmap);
             case 'obj_abs'
                 colormap(handles.axes_obj_abs,cmap);
             case 'obj_phase'
@@ -68,7 +68,7 @@ function ptyshow()
     object_plot_min_col_idx = min(exp_pos_idx(:,2));
     object_plot_max_col_idx = max(exp_pos_idx(:,2));
     
-    obj_real_Ilimit = [min(real(object_info.real_space),[],'all') max(real(object_info.real_space),[],'all')];
+    %obj_real_Ilimit = [min(real(object_info.real_space),[],'all') max(real(object_info.real_space),[],'all')];
     obj_abs_Ilimit = [min(abs(object_info.real_space),[],'all') max(abs(object_info.real_space),[],'all')];
     obj_phase_Ilimit = [min(angle(object_info.real_space),[],'all') max(angle(object_info.real_space),[],'all')];
     
@@ -83,39 +83,40 @@ function ptyshow()
     x_lim_scaned = sort([obj_xaxis(object_plot_min_col_idx) obj_xaxis(object_plot_max_col_idx)]); % in [um]
     y_lim_scaned = sort([obj_yaxis(object_plot_min_row_idx) obj_yaxis(object_plot_max_row_idx)]); % in [um]
     
-    handles.plot_real = imagesc(handles.axes_obj_real,obj_xaxis,obj_yaxis,real(object_info.real_space));
+    %handles.plot_real = imagesc(handles.axes_obj_real,obj_xaxis,obj_yaxis,real(object_info.real_space));
     handles.plot_abs = imagesc(handles.axes_obj_abs,obj_xaxis,obj_yaxis,abs(object_info.real_space));
     handles.plot_phase = imagesc(handles.axes_obj_phase,obj_xaxis,obj_yaxis,angle(object_info.real_space));
-    handles.axes_obj_real.YAxis.Direction = 'normal';
+    %handles.axes_obj_real.YAxis.Direction = 'normal';
     handles.axes_obj_abs.YAxis.Direction = 'normal';
     handles.axes_obj_phase.YAxis.Direction = 'normal';
-    set(handles.axes_obj_real,{'Xlim','Ylim'},{x_lim_scaned,y_lim_scaned});
+    %set(handles.axes_obj_real,{'Xlim','Ylim'},{x_lim_scaned,y_lim_scaned});
     set(handles.axes_obj_abs,{'Xlim','Ylim'},{x_lim_scaned,y_lim_scaned});
     set(handles.axes_obj_phase,{'Xlim','Ylim'},{x_lim_scaned,y_lim_scaned});
-    xlabel(handles.axes_obj_real,'\mum'); ylabel(handles.axes_obj_real,'\mum');
+    %xlabel(handles.axes_obj_real,'\mum'); ylabel(handles.axes_obj_real,'\mum');
     xlabel(handles.axes_obj_abs,'\mum'); ylabel(handles.axes_obj_abs,'\mum');
     xlabel(handles.axes_obj_phase,'\mum'); ylabel(handles.axes_obj_phase,'\mum');
-    title(handles.axes_obj_real,'Object (real)');
+    %title(handles.axes_obj_real,'Object (real)');
     title(handles.axes_obj_abs,'Object (abs.)');
     title(handles.axes_obj_phase,'Object (phase)');
-    axis(handles.axes_obj_real,'image');
+    %axis(handles.axes_obj_real,'image');
     axis(handles.axes_obj_abs,'image');
     axis(handles.axes_obj_phase,'image');
-    set(handles.axes_obj_real,'Colormap',gray);
+    %set(handles.axes_obj_real,'Colormap',gray);
     set(handles.axes_obj_abs,'Colormap',gray);
     set(handles.axes_obj_phase,'Colormap',gray);
 
-    linkaxes([handles.axes_obj_real,handles.axes_obj_abs,handles.axes_obj_phase],'xy');
+    %linkaxes([handles.axes_obj_real,handles.axes_obj_abs,handles.axes_obj_phase],'xy');
+    linkaxes([handles.axes_obj_abs,handles.axes_obj_phase],'xy');
     
-    set(handles.slider_obj_real_H,{'min','max','value'},{obj_real_Ilimit(1),obj_real_Ilimit(2),obj_real_Ilimit(2)},'SlidersTep',[0.01 0.1]);
-    set(handles.slider_obj_real_L,{'min','max','value'},{obj_real_Ilimit(1),obj_real_Ilimit(2),obj_real_Ilimit(1)},'SlidersTep',[0.01 0.1]);
+    %set(handles.slider_obj_real_H,{'min','max','value'},{obj_real_Ilimit(1),obj_real_Ilimit(2),obj_real_Ilimit(2)},'SlidersTep',[0.01 0.1]);
+    %set(handles.slider_obj_real_L,{'min','max','value'},{obj_real_Ilimit(1),obj_real_Ilimit(2),obj_real_Ilimit(1)},'SlidersTep',[0.01 0.1]);
     set(handles.slider_obj_abs_H,{'min','max','value'},{obj_abs_Ilimit(1),obj_abs_Ilimit(2),obj_abs_Ilimit(2)},'SlidersTep',[0.01 0.1]);
     set(handles.slider_obj_abs_L,{'min','max','value'},{obj_abs_Ilimit(1),obj_abs_Ilimit(2),obj_abs_Ilimit(1)},'SlidersTep',[0.01 0.1]);
     set(handles.slider_obj_phase_H,{'min','max','value'},{obj_phase_Ilimit(1),obj_phase_Ilimit(2),obj_phase_Ilimit(2)},'SlidersTep',[0.01 0.1]);
     set(handles.slider_obj_phase_L,{'min','max','value'},{obj_phase_Ilimit(1),obj_phase_Ilimit(2),obj_phase_Ilimit(1)},'SlidersTep',[0.01 0.1]);
     
-    handles.listener_obj_real_H = listener(handles.slider_obj_real_H,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'real_H'));
-    handles.listener_obj_real_L = listener(handles.slider_obj_real_L,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'real_L'));
+    %handles.listener_obj_real_H = listener(handles.slider_obj_real_H,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'real_H'));
+    %handles.listener_obj_real_L = listener(handles.slider_obj_real_L,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'real_L'));
     handles.listener_obj_abs_H = listener(handles.slider_obj_abs_H,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'abs_H'));
     handles.listener_obj_abs_L = listener(handles.slider_obj_abs_L,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'abs_L'));
     handles.listener_obj_phase_H = listener(handles.slider_obj_phase_H,'Value','PreSet',@(src,eventdata)change_show_range(src,eventdata,'phase_H'));
@@ -123,14 +124,14 @@ function ptyshow()
     
     function change_show_range(src,eventdata,target)
         switch target
-            case 'real_H'
-                CLim = get(handles.axes_obj_real,'CLim');
-                CLim(2) = get(handles.slider_obj_real_H,'Value');
-                set(handles.axes_obj_real,'CLim',CLim);
-            case 'real_L'
-                CLim = get(handles.axes_obj_real,'CLim');
-                CLim(1) = get(handles.slider_obj_real_L,'Value');
-                set(handles.axes_obj_real,'CLim',CLim);
+            %case 'real_H'
+            %    CLim = get(handles.axes_obj_real,'CLim');
+            %    CLim(2) = get(handles.slider_obj_real_H,'Value');
+            %    set(handles.axes_obj_real,'CLim',CLim);
+            %case 'real_L'
+            %    CLim = get(handles.axes_obj_real,'CLim');
+            %    CLim(1) = get(handles.slider_obj_real_L,'Value');
+            %    set(handles.axes_obj_real,'CLim',CLim);
             case 'abs_H'
                 CLim = get(handles.axes_obj_abs,'CLim');
                 CLim(2) = get(handles.slider_obj_abs_H,'Value');
