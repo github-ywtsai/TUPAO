@@ -1,4 +1,17 @@
-function object_info = gen_object_info(init_cond)
+function object_info = gen_object_info(init_cond,options)
+
+    arguments
+        init_cond (1,1)
+        options.multi_data_exp_pos = [];
+        % this arguments is desinged for using exp_pos array to extend the range of the object.
+        % For example, to prepare a object for a multi-data ptychography,
+        % using all exp_pos array of the multi-data can genrate a object
+        % suit of the multi-data ptychography.
+    end
+    multi_data_exp_pos = options.multi_data_exp_pos;
+
+    
+
     rng(init_cond.rand_seed + 1)
     effective_clip_size = init_cond.effective_clip_size;
     x_res = init_cond.wavelength * init_cond.detector_distance / effective_clip_size / init_cond. effective_x_pixel_size;
@@ -6,10 +19,15 @@ function object_info = gen_object_info(init_cond)
     object_info.x_res = x_res;
     object_info.y_res = y_res;
     
-    [temp,~] = max(init_cond.exp_pos);
+    if isempty(multi_data_exp_pos)
+        exp_pos_for_define_object_range = init_cond.exp_pos;
+    else
+        exp_pos_for_define_object_range = multi_data_exp_pos;
+    end
+    [temp,~] = max(exp_pos_for_define_object_range);
     exp_pos_ymax = temp(1);
     exp_pos_xmax = temp(2);
-    [temp,~] = min(init_cond.exp_pos);
+    [temp,~] = min(exp_pos_for_define_object_range);
     exp_pos_ymin = temp(1);
     exp_pos_xmin = temp(2);
     % exp_pos_ycen = (exp_pos_ymax + exp_pos_ymin)/2;
@@ -20,6 +38,7 @@ function object_info = gen_object_info(init_cond)
     obj_right_boundary  = exp_pos_xmax + effective_clip_size/2 * x_res + effective_clip_size * x_res * obj_extend_factor;
     obj_bottom_boundary = exp_pos_ymin - effective_clip_size/2 * y_res - effective_clip_size * y_res * obj_extend_factor;
     obj_top_boundary    = exp_pos_ymax + effective_clip_size/2 * y_res + effective_clip_size * y_res * obj_extend_factor;
+
 
     object_row_size = round (( obj_top_boundary - obj_bottom_boundary ) / y_res);
     object_col_size = round (( obj_right_boundary - obj_left_boundary ) / x_res);
@@ -42,9 +61,8 @@ function object_info = gen_object_info(init_cond)
 
     object_info.real_space_xaxis = (object_col_idx(1,:) - object_cen_col_idx) * x_res;
     object_info.real_space_yaxis = -(object_row_idx(:,1) - object_cen_row_idx) * y_res;
-    % 20180115 fix the y axis from
-    % guessed_object.real_space_yaxis = (object_row_idx(:,1) - object_cen_row_idx) * y_res;
 
+    
     object_info = pre_assign_object_intensity_flat(init_cond, object_info,0.9,1);
 end
 
