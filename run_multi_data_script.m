@@ -43,13 +43,13 @@ init_cond.exp_cond_record_fp = 'merged dataset';
 init_cond.master_fp = 'merged dataset';
 all_exp_pos = cell(length(dataSN_list), 1);
 for sn = 1:length(dataSN_list)
-    all_exp_pos{sn} = init_cond_list{sn}.exp_pos + init_cond_list{sn}.exp_pos_cen;
+    all_exp_pos{sn} = init_cond_list{sn}.exp_pos;
 end
 all_exp_pos = vertcat(all_exp_pos{:});
 exp_pos_z_cen = (max(all_exp_pos(:,1)) + min(all_exp_pos(:,1)))/2;
 exp_pos_x_cen = (max(all_exp_pos(:,2)) + min(all_exp_pos(:,2)))/2;
 init_cond.exp_pos_cen = [exp_pos_z_cen,exp_pos_x_cen];
-init_cond.exp_pos = all_exp_pos - init_cond.exp_pos_cen;
+init_cond.exp_pos = all_exp_pos;
 [init_cond.n_of_data,~] = size(init_cond.exp_pos);
 
 
@@ -79,7 +79,7 @@ if isempty(measurement_info)
         all_measured_amp{sn} = measurement_info_list{sn}.measured_amp;
     end
 
-
+    measurement_info = [];
     measurement_info.bad_data_sn = []; % skip bad data function didn't work in merge mode
     measurement_info.bad_data_mask = vertcat(all_bad_data_mask{:});
     measurement_info.individual_mask = cat(3,all_individual_mask{:});
