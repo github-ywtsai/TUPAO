@@ -33,17 +33,17 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
     
     %% arm GPU
     if init_cond.using_GPU
-    idle_GPU_index = find_idle_GPU();
-    fprintf('Auto arrange GPU %d...',idle_GPU_index);
-    gpuDevice(idle_GPU_index);
-    measured_amp = gpuArray(measurement_info.measured_amp);
-    object_info.real_space = gpuArray(object_info.real_space);
-    probe_info.real_space = gpuArray(probe_info.real_space);
-    probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
-    measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
-    measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
-    iteration_para.chi2 = gpuArray(iteration_para.chi2);
-    fprintf('\tDone.\n');
+        idle_GPU_index = find_idle_GPU();
+        fprintf('Auto arrange GPU %d...',idle_GPU_index);
+        gpuDevice(idle_GPU_index);
+        measured_amp = gpuArray(measurement_info.measured_amp);
+        object_info.real_space = gpuArray(object_info.real_space);
+        probe_info.real_space = gpuArray(probe_info.real_space);
+        probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
+        measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
+        measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
+        iteration_para.chi2 = gpuArray(iteration_para.chi2);
+        fprintf('\tDone.\n');
     end
 
     %% iteration part    

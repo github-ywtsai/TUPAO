@@ -16,6 +16,12 @@ function init_cond = gen_init_cond(config_tables)
         init_cond.effective_y_pixel_size = init_cond.y_pixel_size * init_cond.rawdata_clip_size/init_cond.effective_clip_size;      
     end
 
+    init_cond.pixel_res = init_cond.wavelength * init_cond.detector_distance / init_cond.effective_clip_size / init_cond.effective_x_pixel_size;
+    init_cond.CDI_window = init_cond.pixel_res*init_cond.effective_clip_size;
+    fprintf('Pixel resolution = %.1f [nm]\n', init_cond.pixel_res*1E9);
+    fprintf('CDI window = %.1f [um]\n',init_cond.CDI_window*1E6);
+
+    
 end
 
 % Note for get exposure position
