@@ -24,7 +24,7 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
     end
     %% prepare plot axes
     if iteration_para.draw_results
-        fig = figure('position',[100,100,1300,500]);
+        fig = figure('position',[100,100,1300,500],'Name',sprintf('pixel res. = %.f nm',init_cond.pixel_res*1E9));
         axes_obj = axes(fig,'position',[0.0500 0.0500 0.25 0.9000]);
         axes_probe =  axes(fig,'position',[0.3500 0.0500 0.25 0.9000]);
         axes_chi2 =  axes(fig,'position',[0.6500 0.0500 0.25 0.9000]);
@@ -138,8 +138,12 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
         
         %% plot parts
         if iteration_para.draw_results
-            imagesc(axes_obj,object_info.real_space_xaxis,object_info.real_space_yaxis,angle(object_info.real_space));colorbar;axes_obj.DataAspectRatio = [1,1,1];colormap gray;
-            imagesc(axes_probe,probe_info.real_space_xaxis,probe_info.real_space_yaxis,abs(probe_info.real_space(:,:,1)));axes_probe.DataAspectRatio = [1,1,1];
+            obj_x_axis = init_cond.x_direction_modification * object_info.real_space_xaxis * 1E6; % show in um
+            obj_y_axis = init_cond.z_direction_modification * object_info.real_space_yaxis * 1E6; % show in um
+            imagesc(axes_obj,obj_x_axis,obj_y_axis,angle(object_info.real_space));colorbar;axes_obj.DataAspectRatio = [1,1,1];colormap gray;
+            probe_x_axis = probe_info.real_space_xaxis * 1E6; % show in um
+            probe_y_axis = probe_info.real_space_yaxis * 1E6; % show in um
+            imagesc(axes_probe,probe_x_axis,probe_y_axis,abs(probe_info.real_space(:,:,1)));axes_probe.DataAspectRatio = [1,1,1];
             loglog(axes_chi2, iteration_para.chi2);
             drawnow
         end
