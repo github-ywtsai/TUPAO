@@ -1,7 +1,9 @@
+function [init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para] = run_single_data_script(projectFF)
+
 setenv('HDF5_PLUGIN_PATH','/blsw/opt/areaDetector/root/usr/lib/h5plugin');
 
-projectFP = './projects/example/';
-config_tables = load(fullfile(projectFP,'config_tables.mat'));
+create_config_tables_from_files(projectFF)
+config_tables = load(fullfile(projectFF,'config_tables.mat'));
 
 init_cond = gen_init_cond(config_tables);
 mask_info = gen_mask_info(init_cond);
