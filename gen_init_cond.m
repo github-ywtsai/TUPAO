@@ -71,14 +71,23 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
     % add - on z an + on x
     z_direction_modification = -1; % for TPS 25A2
     x_direction_modification = 1; % for TPS 25A2
+    %{
+    % old version, using relative exp_pos
     rel_exp_pos_rbv_z_x = [exp_pos_rbv_z_x(:,1) - exp_pos_rbv_z_cen,exp_pos_rbv_z_x(:,2) - exp_pos_rbv_x_cen];
     n_exp_pos = size(rel_exp_pos_rbv_z_x,1);
     exp_pos = rel_exp_pos_rbv_z_x.* [z_direction_modification*ones(n_exp_pos,1),x_direction_modification*ones(n_exp_pos,1)];
+    exp_pos_cen = [z_direction_modification*exp_pos_rbv_z_cen,x_direction_modification*exp_pos_rbv_x_cen];
+    %}
+    % new version, using absolute position
+    exp_pos = [z_direction_modification*exp_pos_rbv_z_x(:,1),x_direction_modification*exp_pos_rbv_z_x(:,2)];
     exp_pos_cen = [z_direction_modification*exp_pos_rbv_z_cen,x_direction_modification*exp_pos_rbv_x_cen];
     output.exp_pos = exp_pos*1E-6; % convert from um to m
     output.exp_pos_cen = exp_pos_cen*1E-6; % convert from um to m
     [output.n_of_data, ~] = size(exp_pos);
     output.MasterFN = MasterFN;
+    output.z_direction_modification = z_direction_modification;
+    output.x_direction_modification = x_direction_modification;
+    
 end
 
 function init_cond = get_config(config_tables)
@@ -99,6 +108,9 @@ function init_cond = get_config(config_tables)
     init_cond.exp_pos = temp.exp_pos;
     init_cond.exp_pos_cen = temp.exp_pos_cen;
     init_cond.n_of_data = temp.n_of_data;
+    init_cond.x_direction_modification = temp.x_direction_modification;
+    init_cond.z_direction_modification = temp.z_direction_modification;
+    
 
     % get mask file name and file path
     for Idx = 1:4

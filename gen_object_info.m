@@ -30,8 +30,8 @@ function object_info = gen_object_info(init_cond,options)
     [temp,~] = min(exp_pos_for_define_object_range);
     exp_pos_ymin = temp(1);
     exp_pos_xmin = temp(2);
-    % exp_pos_ycen = (exp_pos_ymax + exp_pos_ymin)/2;
-    % exp_pos_xcen = (exp_pos_xmax + exp_pos_xmin)/2;
+    exp_pos_ycen = (exp_pos_ymax + exp_pos_ymin)/2;
+    exp_pos_xcen = (exp_pos_xmax + exp_pos_xmin)/2;
 
     obj_extend_factor = 0.1; % ex: 0.1 meaning 10% probe_area extented
     obj_left_boundary   = exp_pos_xmin - effective_clip_size/2 * x_res - effective_clip_size * x_res * obj_extend_factor;
@@ -59,9 +59,9 @@ function object_info = gen_object_info(init_cond,options)
     object_row_idx = reshape(object_row_idx,object_row_size,object_col_size);
     object_col_idx = reshape(object_col_idx,object_row_size,object_col_size);
 
-    object_info.real_space_xaxis = (object_col_idx(1,:) - object_cen_col_idx) * x_res;
-    object_info.real_space_yaxis = -(object_row_idx(:,1) - object_cen_row_idx) * y_res;
-
+    object_info.real_space_xaxis = init_cond.x_direction_modification* (object_col_idx(1,:) - object_cen_col_idx) * x_res + exp_pos_xcen;
+    object_info.real_space_yaxis = init_cond.z_direction_modification* (object_row_idx(:,1) - object_cen_row_idx) * y_res + exp_pos_ycen;
+    
     
     object_info = pre_assign_object_intensity_flat(init_cond, object_info,0.9,1);
 end
