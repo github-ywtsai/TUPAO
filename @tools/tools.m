@@ -4,5 +4,6 @@ classdef tools
         idle_GPU_index = find_idle_GPU()
         absolute_path = get_absolute_path(input_path)
         ptycho_pachage = initialize(projectFF)
+        save_section_file(fn,ptycho_package)
     end
 end
