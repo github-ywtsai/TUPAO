@@ -5,7 +5,7 @@ arguments
     options.core = 'rPIE'
     options.alpha = 0.9 % for object update
     options.beta = 0.5 % for probe update
-    options.iteration_num = 5
+    options.iteration_num = 10
     options.real_space_constraint = 'imaginary'
     options.real_space_constraint_factor = 0.9
     % ====== real_space_constraint & real_space_constraint_factor ======
@@ -28,21 +28,6 @@ real_space_constraint_factor = options.real_space_constraint_factor;
     % spectrum = fftshift(fft2(ifftshift(myimage))
     % myimage = fftshift(ifft2(ifftshift(spectrum))
     
-    object = ptycho_package.object_info.real_space;
-    probe = ptycho_package.probe_info.real_space;
-    %chi2_temp = zeros(1,init_cond.n_of_data);
-    individual_mask = ptycho_package.measurement_info.individual_mask;
-    individual_mask_active_area = ptycho_package.measurement_info.individual_mask_active_area;
-
-    %gpu_chi2_temp = gpuArray(chi2_temp); % put chi2_temp into gpu
-
-
-    switch real_space_constraint
-        case 'real'
-            object(real(object)<0) = object(real(object)<0)*real_space_constraint_factor;
-        case 'imaginary'
-            object(imag(object)<0) = object(imag(object)<0)*real_space_constraint_factor;
-    end
     
     %{
     % didn't work well yet
@@ -58,89 +43,101 @@ real_space_constraint_factor = options.real_space_constraint_factor;
             [probe,~,~] = propagate_probe(propagating_dist,upstream_probe,wavelength,upstream_x_axis,upstream_y_axis);
     end
     %}
-    
-    interesting_table = iteration_para.interesting_table;
 
-    % assign varible to gpu
-    idle_GPU_index = tools.find_idle_GPU();
-    gpuDevice(idle_GPU_index);
-    fprintf('Auto arrange GPU %d...\n',idle_GPU_index);
+    % ====== assign varible to gpu ======
+    %chi2_temp = zeros(1,init_cond.n_of_data);
+    %gpu_chi2_temp = gpuArray(chi2_temp); % put chi2_temp into gpu
     gpu_measured_amp = gpuArray(ptycho_package.measurement_info.measured_amp);
-    gpu_probe = gpuArray(probe);
-    gpu_object = gpuArray(object);
-    gpu_individual_mask = gpuArray(individual_mask);
-    gpu_individual_mask_active_area = gpuArray(individual_mask_active_area);
+    gpu_probe = gpuArray(ptycho_package.probe_info.real_space);
+    gpu_object = gpuArray(ptycho_package.object_info.real_space);
+    gpu_individual_mask = gpuArray(ptycho_package.measurement_info.individual_mask);
+    % gpu_individual_mask_active_area = gpuArray(ptycho_package.measurement_info.individual_mask_active_area);
     
-    for data_sn = interesting_table
-        data = gpu_measured_amp(:,:,data_sn);
-        mask = gpu_individual_mask(:,:,data_sn);
-        active_area = gpu_individual_mask_active_area(data_sn);
+    for iteration_progress = 1:iteration_num
+        fprintf('Iterating %d/%d...\t',iteration_progress,iteration_num);
+        tic;
         
-        exp_cen_row_idx = ptycho_package.object_info.exp_pos_idx(data_sn,1) + ptycho_package.probe_info.pos_correct_pixel(data_sn,1);
-        exp_cen_col_idx = ptycho_package.object_info.exp_pos_idx(data_sn,2) + ptycho_package.probe_info.pos_correct_pixel(data_sn,2);
-        row_start_idx = exp_cen_row_idx - (ptycho_package.init_cond.effective_clip_size - 1)/2;
-        row_end_idx = exp_cen_row_idx + (ptycho_package.init_cond.effective_clip_size - 1)/2;
-        col_start_idx = exp_cen_col_idx - (ptycho_package.init_cond.effective_clip_size - 1)/2;
-        col_end_idx = exp_cen_col_idx + (ptycho_package.init_cond.effective_clip_size - 1)/2;   
-        gpu_clip_object = gpu_object(row_start_idx:row_end_idx,col_start_idx:col_end_idx);
-
-        % formula (3) S(12)
-        psi = gpu_probe .* gpu_clip_object;
-        % psi(:,:,k)
-        % k for probe(Mp)
-        % psi for real space in (S12)
-        
-        % formula (4)
-        Psi = fftshift(fft2(ifftshift(psi))); % fixed 20220809
-        % Psi(:,:,k)        
-        
-        % formula (5), (S11)
-        Psi_amp_flat = sqrt(sum(abs(Psi).^2,3)); % flat matrix.
-        % multi-probe results are non-interference. using sqrt(|a|^2 + |b|^2 + ....)
-        Psi_amp_flat_non_zero_mask = Psi_amp_flat ~= 0;
-        Psi_amp_flat(~Psi_amp_flat_non_zero_mask) = 1E30; % invoid the NaN resutls in Psi_amp_flat equals to 0;
-        Psi_p = Psi.*mask + data .* Psi./Psi_amp_flat .* ~mask.*single(Psi_amp_flat_non_zero_mask);
-        % calculate chi^2
-        %gpu_chi2_temp(1,data_sn) = sum(sum( (Psi_amp_flat -data).^2.*~mask))/active_area;
-        clear Psi Psi_amp_flat_non_zero_mask Psi_amp_flat data
-        psi_p = fftshift(ifft2(ifftshift(Psi_p))); % fixed 20220809
-        diff_psi_p_psi = psi_p - psi;
-        clear psi_p psi
-        % Psi_amp_flat, Psi_p and psi_p are the matrix in [clip_size,clip_size,Mp]
-        
-        switch core
-            case 'rPIE'
-                % update object
-                % rPIE
-                PMax = max(sum(abs(gpu_probe).^2,3),[],'all');
-                upper_term = sum(conj(gpu_probe).* diff_psi_p_psi,3);
-                lower_term = (1-alpha)*sum(abs(gpu_probe).^2,3) + alpha*PMax;
-                gpu_object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gpu_clip_object + upper_term./lower_term;
-                %update probe
-                % formula (7) (S22)
-                oMax = max( sum(abs(gpu_clip_object).^2,3),[],'all');
-                upper_term = conj(gpu_clip_object).* diff_psi_p_psi;
-                lower_term = (1-beta)*abs(gpu_clip_object).^2 + beta*oMax;
-                if beta ~= 0
-                    gpu_probe = gpu_probe + upper_term./lower_term;
-                end
-            case 'ePIE'
-                % update object
-                % formula (6) (S21)
-                first_term = alpha / max(max( sum(abs(gpu_probe).^2,3)));
-                second_term = sum(conj(gpu_probe).* diff_psi_p_psi,3); 
-                gpu_object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gpu_clip_object + first_term * second_term;
-
-                %update probe
-                % formula (7) (S22)
-                first_term = beta / max(max( sum(abs(gpu_clip_object).^2,3)));
-                second_term = conj(gpu_clip_object).* diff_psi_p_psi;
-                gpu_probe = gpu_probe + first_term * second_term;
+        % apply real space constraint
+        switch real_space_constraint
+            case 'real'
+                gpu_object(real(gpu_object)<0) = gpu_object(real(gpu_object)<0)*real_space_constraint_factor;
+            case 'imaginary'
+                gpu_object(imag(gpu_object)<0) = gpu_object(imag(gpu_object)<0)*real_space_constraint_factor;
         end
-                
         
-        clear first_term second_term diff_psi_p_psi
+        for data_sn = ptycho_package.iteration_para.interesting_table
+            data = gpu_measured_amp(:,:,data_sn);
+            mask = gpu_individual_mask(:,:,data_sn);
+            % active_area = gpu_individual_mask_active_area(data_sn); % no
+            % use but not sure.
+            
+            exp_cen_row_idx = ptycho_package.object_info.exp_pos_idx(data_sn,1) + ptycho_package.probe_info.pos_correct_pixel(data_sn,1);
+            exp_cen_col_idx = ptycho_package.object_info.exp_pos_idx(data_sn,2) + ptycho_package.probe_info.pos_correct_pixel(data_sn,2);
+            row_start_idx = exp_cen_row_idx - (ptycho_package.init_cond.effective_clip_size - 1)/2;
+            row_end_idx = exp_cen_row_idx + (ptycho_package.init_cond.effective_clip_size - 1)/2;
+            col_start_idx = exp_cen_col_idx - (ptycho_package.init_cond.effective_clip_size - 1)/2;
+            col_end_idx = exp_cen_col_idx + (ptycho_package.init_cond.effective_clip_size - 1)/2;   
+            gpu_clip_object = gpu_object(row_start_idx:row_end_idx,col_start_idx:col_end_idx);
+            
+            % formula (3) S(12)
+            psi = gpu_probe .* gpu_clip_object;
+            % psi(:,:,k)
+            % k for probe(Mp)
+            % psi for real space in (S12)
 
+            % formula (4)
+            Psi = fftshift(fft2(ifftshift(psi))); % fixed 20220809
+            % Psi(:,:,k)        
+
+            % formula (5), (S11)
+            Psi_amp_flat = sqrt(sum(abs(Psi).^2,3)); % flat matrix.
+            % multi-probe results are non-interference. using sqrt(|a|^2 + |b|^2 + ....)
+            Psi_amp_flat_non_zero_mask = Psi_amp_flat ~= 0;
+            Psi_amp_flat(~Psi_amp_flat_non_zero_mask) = 1E30; % invoid the NaN resutls in Psi_amp_flat equals to 0;
+            Psi_p = Psi.*mask + data .* Psi./Psi_amp_flat .* ~mask.*single(Psi_amp_flat_non_zero_mask);
+            % calculate chi^2
+            %gpu_chi2_temp(1,data_sn) = sum(sum( (Psi_amp_flat -data).^2.*~mask))/active_area;
+            clear Psi Psi_amp_flat_non_zero_mask Psi_amp_flat data
+            psi_p = fftshift(ifft2(ifftshift(Psi_p))); % fixed 20220809
+            diff_psi_p_psi = psi_p - psi;
+            clear psi_p psi
+            % Psi_amp_flat, Psi_p and psi_p are the matrix in [clip_size,clip_size,Mp]
+
+            switch core
+                case 'rPIE'
+                    % update object
+                    % rPIE
+                    PMax = max(sum(abs(gpu_probe).^2,3),[],'all');
+                    upper_term = sum(conj(gpu_probe).* diff_psi_p_psi,3);
+                    lower_term = (1-alpha)*sum(abs(gpu_probe).^2,3) + alpha*PMax;
+                    gpu_object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gpu_clip_object + upper_term./lower_term;
+                    %update probe
+                    % formula (7) (S22)
+                    oMax = max( sum(abs(gpu_clip_object).^2,3),[],'all');
+                    upper_term = conj(gpu_clip_object).* diff_psi_p_psi;
+                    lower_term = (1-beta)*abs(gpu_clip_object).^2 + beta*oMax;
+                    if beta ~= 0
+                        gpu_probe = gpu_probe + upper_term./lower_term;
+                    end
+                case 'ePIE'
+                    % update object
+                    % formula (6) (S21)
+                    first_term = alpha / max(max( sum(abs(gpu_probe).^2,3)));
+                    second_term = sum(conj(gpu_probe).* diff_psi_p_psi,3); 
+                    gpu_object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gpu_clip_object + first_term * second_term;
+
+                    %update probe
+                    % formula (7) (S22)
+                    first_term = beta / max(max( sum(abs(gpu_clip_object).^2,3)));
+                    second_term = conj(gpu_clip_object).* diff_psi_p_psi;
+                    gpu_probe = gpu_probe + first_term * second_term;
+            end
+
+
+            clear first_term second_term diff_psi_p_psi
+        end
+        elapsed_time = toc;
+        fprintf('%.1f sec\n',elapsed_time);
     end
     
     % gather variables from gpu

@@ -20,6 +20,10 @@ ptycho_package.object_info = object_info;
 ptycho_package.probe_info = probe_info;
 ptycho_package.iteration_para = iteration_para;
 
+% arange GPU
+idle_GPU_index = tools.find_idle_GPU();
+gpuDevice(idle_GPU_index);
+fprintf('Auto arrange GPU %d...\n',idle_GPU_index);
 
 %% assign varialbes to workspace directly
 % assignin('base','init_cond',init_cond);
