@@ -1,6 +1,6 @@
 Value                                                  % Discription
 /home/tsai.yw/UsersData/20250701/                   % the folder of the files
-250701_ptycho-scan_id-8430-primary.csv                            % the file name of the scan position file
+250701_ptycho-scan_id-8418-primary.csv                            % the file name of the scan position file
 None                                            % the file name of the csv mask file (None for skipping)
 None                                                   % the file name of the csv mask file (None for skipping)        
 None                                                   % the file name of the csv mask file (None for skipping)
@@ -13,5 +13,5 @@ Auto                                                   % Detector X pixel size [
 Auto                                                   % Detector Y pixel size [um] (Auto for loading from the header in the master file)                                                   % Data clipping size
 500                                                    % Data clipping size
 1                                                      % probe extending factor
-None                                                       % seed for random (None for random seed)
+95847942                                                       % seed for random (None for random seed)
 rPIE                                                      % core: ePIE, rPIE, mPIE, ML, DM

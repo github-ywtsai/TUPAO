@@ -119,59 +119,10 @@ disp(config_probe_table);
 fprintf('\n');
 
 
-%% =================== 3. Process config_iteration.txt ======================
-fprintf('3. Processing config_iteration.txt...\n');
+%% ======================= 3. Save Tables        ==========================
+save(fullfile(projectFF,'config_tables.mat'),'config_init_cond_table','config_probe_table');
 
-% --- Manually define parameter names (RowNames) ---
-names_iteration = {
-    'max_iteration'
-    'save_results_period'
-    'alpha_object_update'
-    'probe_update_start'
-    'beta_probe_update'
-    'real_space_constraint_start'
-    'real_space_constraint_factor'
-    'pos_corr_start'
-    'pos_corr_period'
-    'pos_corr_points'
-    'pos_corr_range_nm'
-    'probe_deny_area_factor'
-    'probe_deny_reduce_ratio'
-    'draw_results_period'
-    };
-    
-% --- Manually define English descriptions ---
-descriptions_iteration = {
-    'Max Iteration Number'
-    'Save Results period'
-    'Alpha for object update'
-    'Probe update start run'
-    'Beta for probe update'
-    'Real space constraint start run'
-    'Real space constraint factor'
-    'Position correction start run'
-    'Position correction period'
-    'Position correction points'
-    'Position correction range (nm)'
-    'Probe deny area factor'
-    'Probe deny reducing ratio'
-    'Draw results period'
-    };
-
-% Call the parsing function and create the table
-file_iteration = fullfile(projectFF,'config_iteration.txt');
-config_iteration_table = parse_config_file_to_table(file_iteration, names_iteration, descriptions_iteration);
-
-% Display the result
-disp('Created config_iteration_table:');
-disp(config_iteration_table);
-fprintf('\n');
-
-
-%% ======================= 4. Save Tables        ==========================
-save(fullfile(projectFF,'config_tables.mat'),'config_init_cond_table','config_probe_table','config_iteration_table');
-
-%% ======================= 5. Clean Up Workspace ==========================
+%% ======================= 4. Clean Up Workspace ==========================
 % This section cleans up all temporary variables used for setup,
 % leaving only the final config tables in the workspace.
 

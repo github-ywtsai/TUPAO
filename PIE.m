@@ -65,7 +65,7 @@ real_space_constraint_factor = options.real_space_constraint_factor;
                 gpu_object(imag(gpu_object)<0) = gpu_object(imag(gpu_object)<0)*real_space_constraint_factor;
         end
         
-        for data_sn = ptycho_package.iteration_para.interesting_table
+        for data_sn = 1:ptycho_package.init_cond.n_of_data
             data = gpu_measured_amp(:,:,data_sn);
             mask = gpu_individual_mask(:,:,data_sn);
             % active_area = gpu_individual_mask_active_area(data_sn); % no
