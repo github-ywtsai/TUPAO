@@ -17,7 +17,7 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     probe_y_axis = probe_info.real_space_yaxis;
     propagating_dist = probe_info.ProbeConf.ApertureDist;
     upstream_ROI = probe_info.ProbeConf.upstream_ROI;
-    
+
 
     chi2_temp = gpuArray(chi2_temp); % put chi2_temp into gpu
 
@@ -52,7 +52,7 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         row_end_idx = exp_cen_row_idx + (init_cond.effective_clip_size - 1)/2;
         col_start_idx = exp_cen_col_idx - (init_cond.effective_clip_size - 1)/2;
         col_end_idx = exp_cen_col_idx + (init_cond.effective_clip_size - 1)/2;   
-        clip_object = object(row_start_idx:row_end_idx,col_start_idx:col_end_idx);
+        clip_object = gpuArray(object(row_start_idx:row_end_idx,col_start_idx:col_end_idx));
 
         % formula (3) S(12)
         psi = probe .* clip_object;
@@ -61,8 +61,7 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         % psi for real space in (S12)
         
         % formula (4)
-        Psi = fftshift((fft2(ifftshift(psi)))); % fixed 20220809
-        % Psi = fftshift(fft2(psi));
+        Psi = fftshift(fft2(ifftshift(psi))); % fixed 20220809
         % Psi(:,:,k)        
         
         % formula (5), (S11)
@@ -74,7 +73,6 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         % calculate chi^2
         chi2_temp(1,data_sn) = sum(sum( (Psi_amp_flat -data).^2.*~mask))/active_area;
         clear Psi Psi_amp_flat_non_zero_mask Psi_amp_flat data
-        %psi_p = ifft2(ifftshift(Psi_p));
         psi_p = fftshift(ifft2(ifftshift(Psi_p))); % fixed 20220809
         diff_psi_p_psi = psi_p - psi;
         clear psi_p psi
@@ -103,9 +101,8 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         end
         
         clear first_term second_term diff_psi_p_psi
-        
+
     end
-    
 
     chi2_sum = sum(chi2_temp);
     updated_object = object;

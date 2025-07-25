@@ -1,5 +1,9 @@
 function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)
-    
+    % reference: https://stackoverflow.com/questions/32166879/do-i-need-to-call-fftshift-before-calling-fft-or-ifft
+    % when should apply ifftshift and fftshift?
+    % simple answer:
+    % spectrum = fftshift(fft2(ifftshift(myimage))
+    % myimage = fftshift(ifft2(ifftshift(spectrum))
     
     object = object_info.real_space;
     probe = probe_info.real_space;
@@ -13,17 +17,11 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
     probe_y_axis = probe_info.real_space_yaxis;
     propagating_dist = probe_info.ProbeConf.ApertureDist;
     upstream_ROI = probe_info.ProbeConf.upstream_ROI;
-    
-    if init_cond.using_GPU
-        %object = gpuArray(object);
-        % probe = gpuArray(probe);
-        chi2_temp = gpuArray(chi2_temp);
-        %upstream_ROI = gpuArray(upstream_ROI);
-        %measured_amp = gpuArray(measured_amp);
-        %individual_mask = gpuArray(individual_mask);
-        %individual_mask_active_area = gpuArray(individual_mask_active_area);
-    end
-    
+
+
+    chi2_temp = gpuArray(chi2_temp); % put chi2_temp into gpu
+
+
     if iteration_para.real_space_constraint_status == 1
             real_space_constraint_factor = iteration_para.real_space_constraint_factor;
             if real_space_constraint_factor > 0
@@ -41,9 +39,7 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
     end
     
     interesting_table = iteration_para.interesting_table;
-    %if round(rand())
-    %    interesting_table = fliplr(interesting_table);
-    %end
+
     
     for data_sn = interesting_table
         data = measured_amp(:,:,data_sn);
@@ -95,12 +91,12 @@ function [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,m
         probe = probe + first_term * second_term;
         
         clear first_term second_term diff_psi_p_psi
-          
+
     end
-    
+
     chi2_sum = sum(chi2_temp);
     updated_object = object;
     updated_probe = probe;
-    
+
     
 end
