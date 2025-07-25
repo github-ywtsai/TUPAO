@@ -84,11 +84,9 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
         tic;       
         % ePIE or rPIE
         if strcmpi(init_cond.core,'ePIE') 
-            [updated_object,updated_probe,chi2_sum] = ePIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
+            [updated_object,updated_probe,chi2_sum] = PIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,'core','ePIE');
         elseif strcmpi(init_cond.core,'rPIE') 
-            [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
-        elseif strcmpi(init_cond.core,'test_function') 
-            [updated_object,updated_probe,chi2_sum] = test_function(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para);
+            [updated_object,updated_probe,chi2_sum] = PIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,'core','rPIE');
         end
         [~,n_of_interesting_data] = size(iteration_para.interesting_table);
         iteration_para.chi2(CurrentRun) = chi2_sum/n_of_interesting_data;

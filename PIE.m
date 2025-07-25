@@ -1,4 +1,16 @@
-function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)
+function [updated_object,updated_probe,chi2_sum] = PIE(measured_amp,init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para,options)
+arguments
+    measured_amp
+    init_cond
+    mask_info
+    measurement_info
+    object_info
+    probe_info
+    iteration_para
+    
+    options.core = 'rPIE'
+end
+
     % reference: https://stackoverflow.com/questions/32166879/do-i-need-to-call-fftshift-before-calling-fft-or-ifft
     % when should apply ifftshift and fftshift?
     % simple answer:
@@ -78,27 +90,36 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
         clear psi_p psi
         % Psi_amp_flat, Psi_p and psi_p are the matrix in [clip_size,clip_size,Mp]
         
-        % update object
-        % rPIE
-        PMax = max(sum(abs(probe).^2,3),[],'all');
-        upper_term = sum(conj(probe).* diff_psi_p_psi,3);
-        lower_term = (1-iteration_para.alpha_current)*sum(abs(probe).^2,3) + iteration_para.alpha*PMax;
-        object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gather(clip_object + upper_term./lower_term);
-        % first_term = iteration_para.alpha / max(max(sum(abs(probe).^2,3))); % ePIE
-        % second_term = sum(conj(probe).* diff_psi_p_psi,3); % ePIE
-        % object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gather(clip_object + first_term * second_term); % ePIE
-        
-        %update probe
-        % formula (7) (S22)
-        oMax = max( sum(abs(clip_object).^2,3),[],'all');
-        upper_term = conj(clip_object).* diff_psi_p_psi;
-        lower_term = (1-iteration_para.beta_current)*abs(clip_object).^2 + iteration_para.beta_current*oMax;
-        if iteration_para.beta_current ~= 0
-            probe = probe + upper_term./lower_term;
-        %first_term = iteration_para.beta_current / max(max( sum(abs(clip_object).^2,3))); % ePIE
-        %second_term = conj(clip_object).* diff_psi_p_psi; % ePIE
-        %probe = probe + first_term * second_term; % ePIE
+        switch options.core
+            case 'rPIE'
+                % update object
+                % rPIE
+                PMax = max(sum(abs(probe).^2,3),[],'all');
+                upper_term = sum(conj(probe).* diff_psi_p_psi,3);
+                lower_term = (1-iteration_para.alpha_current)*sum(abs(probe).^2,3) + iteration_para.alpha*PMax;
+                object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = gather(clip_object + upper_term./lower_term);
+                %update probe
+                % formula (7) (S22)
+                oMax = max( sum(abs(clip_object).^2,3),[],'all');
+                upper_term = conj(clip_object).* diff_psi_p_psi;
+                lower_term = (1-iteration_para.beta_current)*abs(clip_object).^2 + iteration_para.beta_current*oMax;
+                if iteration_para.beta_current ~= 0
+                    probe = probe + upper_term./lower_term;
+                end
+            case 'ePIE'
+                % update object
+                % formula (6) (S21)
+                first_term = iteration_para.alpha_current / max(max( sum(abs(probe).^2,3)));
+                second_term = sum(conj(probe).* diff_psi_p_psi,3); 
+                object(row_start_idx:row_end_idx,col_start_idx:col_end_idx) = clip_object + first_term * second_term;
+
+                %update probe
+                % formula (7) (S22)
+                first_term = iteration_para.beta_current / max(max( sum(abs(clip_object).^2,3)));
+                second_term = conj(clip_object).* diff_psi_p_psi;
+                probe = probe + first_term * second_term;
         end
+                
         
         clear first_term second_term diff_psi_p_psi
 
