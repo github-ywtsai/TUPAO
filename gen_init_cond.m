@@ -189,15 +189,6 @@ function init_cond = get_config(config_tables)
     init_cond.effective_clip_size = init_cond.rawdata_clip_size;
     
     
-    %% get using GPU setting
-    GPUDeviceNumber = config_init_cond_tables{'gpu_device_num','Value'}{1};
-    if strcmpi(GPUDeviceNumber,'None')
-        init_cond.using_GPU = 0;
-    else
-        init_cond.using_GPU = GPUDeviceNumber;
-    end
-    
-    
     %% get probe range extend condition
     init_cond.probe_extending_factor = config_init_cond_tables{'probe_extend_factor','Value'}{1};
 

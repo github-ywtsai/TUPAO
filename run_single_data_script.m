@@ -2,7 +2,7 @@ function [init_cond,mask_info,measurement_info,object_info,probe_info,iteration_
 
 setenv('HDF5_PLUGIN_PATH','/blsw/opt/areaDetector/root/usr/lib/h5plugin');
 
-create_config_tables_from_files(projectFF)
+tools.create_config_tables_from_files(projectFF)
 config_tables = load(fullfile(projectFF,'config_tables.mat'));
 
 init_cond = gen_init_cond(config_tables);

@@ -1,28 +1,6 @@
 function [updated_object_info, updated_probe_info, updated_iteration_para] =  ptycho(init_cond,mask_info,measurement_info,object_info,probe_info,iteration_para)    
-    function idle_GPU_index = find_idle_GPU()
-        idle_GPU_index = [];
-        command = 'nvidia-smi pmon -c 1';
-        [status, cmdout] = system(command);
-        lines = strsplit(cmdout,'\n');
-        for ii = 1:length(lines)
-            line = strtrim(lines{ii});
-            if isempty(line) || startsWith(line,'#')
-                continue;
-            end
-            temp = strsplit(line,' ');
-            GPU_index = str2double(temp{1})+1;
-            name = temp{end};
-            if strcmp(name,'-')
-                idle_GPU_index = GPU_index;
-                fprintf('Find idle GPU %d.\n',idle_GPU_index);
-                break
-            end
-        end
-        if isempty(idle_GPU_index)
-            error('No idle GPU found.')
-        end
-    end
-    %% prepare plot axes
+
+%% prepare plot axes
     if iteration_para.draw_results
         fig = figure('position',[100,100,1300,500],'Name',sprintf('pixel res. = %.f nm',init_cond.pixel_res*1E9));
         axes_obj = axes(fig,'position',[0.0500 0.0500 0.25 0.9000]);
@@ -32,19 +10,18 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
 %    SectionFilePrefix = sprintf('SN%d',sectionfile_info.SN);
     
     %% arm GPU
-    if init_cond.using_GPU
-        idle_GPU_index = find_idle_GPU();
-        fprintf('Auto arrange GPU %d...',idle_GPU_index);
-        gpuDevice(idle_GPU_index);
-        measured_amp = gpuArray(measurement_info.measured_amp);
-        object_info.real_space = gpuArray(object_info.real_space);
-        probe_info.real_space = gpuArray(probe_info.real_space);
-        probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
-        measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
-        measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
-        iteration_para.chi2 = gpuArray(iteration_para.chi2);
-        fprintf('\tDone.\n');
-    end
+    idle_GPU_index = tools.find_idle_GPU();
+    fprintf('Auto arrange GPU %d...',idle_GPU_index);
+    gpuDevice(idle_GPU_index);
+    measured_amp = gpuArray(measurement_info.measured_amp);
+    object_info.real_space = gpuArray(object_info.real_space);
+    probe_info.real_space = gpuArray(probe_info.real_space);
+    probe_info.ProbeConf.upstream_ROI = gpuArray(probe_info.ProbeConf.upstream_ROI);
+    measurement_info.individual_mask = gpuArray(measurement_info.individual_mask);
+    measurement_info.individual_mask_active_area = gpuArray(measurement_info.individual_mask_active_area);
+    iteration_para.chi2 = gpuArray(iteration_para.chi2);
+    fprintf('\tDone.\n');
+
 
     %% iteration part    
     while iteration_para.FinishedRun + 1 <= iteration_para.max_iteration_num
@@ -180,13 +157,13 @@ function [updated_object_info, updated_probe_info, updated_iteration_para] =  pt
     updated_object_info = object_info;
     updated_probe_info = probe_info;
     updated_iteration_para = iteration_para;
-    if init_cond.using_GPU
-        updated_object_info.real_space = gather(updated_object_info.real_space);
-        updated_probe_info.real_space = gather(updated_probe_info.real_space);
-        updated_probe_info.ProbeConf.upstream_ROI = gather(updated_probe_info.ProbeConf.upstream_ROI);
-        updated_iteration_para.chi2 = gather(updated_iteration_para.chi2);
-        measurement_info.individual_mask = gather(measurement_info.individual_mask);
-        measurement_info.individual_mask_active_area = gather(measurement_info.individual_mask_active_area);
-    end
+
+    updated_object_info.real_space = gather(updated_object_info.real_space);
+    updated_probe_info.real_space = gather(updated_probe_info.real_space);
+    updated_probe_info.ProbeConf.upstream_ROI = gather(updated_probe_info.ProbeConf.upstream_ROI);
+    updated_iteration_para.chi2 = gather(updated_iteration_para.chi2);
+    measurement_info.individual_mask = gather(measurement_info.individual_mask);
+    measurement_info.individual_mask_active_area = gather(measurement_info.individual_mask_active_area);
+
     
 end

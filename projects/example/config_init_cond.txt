@@ -11,8 +11,7 @@ Auto                                                   % wavelength [A] (Auto fo
 Auto                                                  % Sample to detector distance [m] (Auto for loading from the header in the master file)
 Auto                                                   % Detector X pixel size [um] (Auto for loading from the header in the master file)
 Auto                                                   % Detector Y pixel size [um] (Auto for loading from the header in the master file)                                                   % Data clipping size
-1000                                                    % Data clipping size
-6                                                      % arrage GPU device number (None for skipping)
-0.5                                                      % probe extending factor
+500                                                    % Data clipping size
+1                                                      % probe extending factor
 None                                                       % seed for random (None for random seed)
 rPIE                                                      % core: ePIE, rPIE, mPIE, ML, DM

@@ -18,15 +18,9 @@ function [updated_object,updated_probe,chi2_sum] = rPIE(measured_amp,init_cond,m
     propagating_dist = probe_info.ProbeConf.ApertureDist;
     upstream_ROI = probe_info.ProbeConf.upstream_ROI;
     
-    if init_cond.using_GPU
-        %object = gpuArray(object);
-        % probe = gpuArray(probe);
-        chi2_temp = gpuArray(chi2_temp);
-        %upstream_ROI = gpuArray(upstream_ROI);
-        %measured_amp = gpuArray(measured_amp);
-        %individual_mask = gpuArray(individual_mask);
-        %individual_mask_active_area = gpuArray(individual_mask_active_area);
-    end
+
+    chi2_temp = gpuArray(chi2_temp); % put chi2_temp into gpu
+
 
     if iteration_para.real_space_constraint_status == 1
             real_space_constraint_factor = iteration_para.real_space_constraint_factor;
