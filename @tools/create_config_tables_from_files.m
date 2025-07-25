@@ -61,6 +61,9 @@ descriptions_init_cond = {
 file_init_cond = fullfile(projectFF,'config_init_cond.txt');
 config_init_cond_table = parse_config_file_to_table(file_init_cond, names_init_cond, descriptions_init_cond);
 
+% record projectFF information
+config_init_cond_table{'project_folder_path',:} = {tools.get_absolute_path(projectFF),'The folder of the configurations and results'};
+
 % Display the result
 disp('Created config_init_cond_table:');
 disp(config_init_cond_table);

@@ -92,8 +92,9 @@ end
 
 function init_cond = get_config(config_tables)
     init_cond.config_tables = config_tables;
+    init_cond.projectFF = init_cond.config_tables.config_init_cond_table{'project_folder_path','Value'}{1};
     config_init_cond_tables = config_tables.config_init_cond_table;
-
+    
     % get  file folder
     DataFF = config_init_cond_tables{'folder_path','Value'}{1};
     % get expeirmentcal condition file name and file path
