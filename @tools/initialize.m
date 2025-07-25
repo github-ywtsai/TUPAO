@@ -1,4 +1,13 @@
-function ptycho_package = initialize(projectFF)
+function ptycho_package = initialize(projectFF,options)
+% usage:
+% auto arange GPU (default) : ptycho_package = initialize(projectFF,'arange_GPU',True)
+% don't arange GPU : ptycho_package = initialize(projectFF,'arange_GPU',False)
+arguments
+    projectFF
+    
+    options.arange_GPU = True
+end
+arange_GPU = options.arange_GPU;
 
 setenv('HDF5_PLUGIN_PATH','/blsw/opt/areaDetector/root/usr/lib/h5plugin');
 
@@ -19,6 +28,11 @@ ptycho_package.object_info = object_info;
 ptycho_package.probe_info = probe_info;
 
 % arange GPU
-idle_GPU_index = tools.find_idle_GPU();
-gpuDevice(idle_GPU_index);
-fprintf('Auto arrange GPU %d...\n',idle_GPU_index);
+if arange_GPU
+    idle_GPU_index = tools.find_idle_GPU();
+    gpuDevice(idle_GPU_index);
+    fprintf('Auto arrange GPU %d...\n',idle_GPU_index);
+else
+    fprintf('GPU did not be arranged automatically.\n');
+    fprintf('GPU must be arraged manully using command: gpuDevice(GPU#).\n');
+end
