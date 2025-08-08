@@ -45,14 +45,22 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
     MasterFPattern_idx = find(cellfun(@(x) ~isempty(regexpi(x,'eig\d*m_file_file_write_name_pattern')),VariableNames));
     xidx = find(cellfun(@(X)strcmpi(X,'_cisamf_x'),VariableNames));
     zidx = find(cellfun(@(X)strcmpi(X,'_cisamf_z'),VariableNames));
+    seq_num_idx = find(cellfun(@(X)strcmpi(X,'seq_num'),VariableNames));
+    img_count_idx =  find(matches(string(VariableNames),regexpPattern("eig\d+m_img_count"),"IgnoreCase",true));
     MasterFPattern = table_temp.Properties.VariableNames{MasterFPattern_idx};
     xaxis_variablename = table_temp.Properties.VariableNames{xidx};
     zaxis_variablename = table_temp.Properties.VariableNames{zidx};
+    seq_num_variablename = table_temp.Properties.VariableNames{seq_num_idx};
+    img_count_variablename = table_temp.Properties.VariableNames{img_count_idx};
     cmd = sprintf('masterfilepattern = table_temp.%s;',MasterFPattern);
     eval(cmd);
     cmd = sprintf('xpos = table_temp.(''%s'');',xaxis_variablename);
     eval(cmd);
     cmd = sprintf('zpos = table_temp.(''%s'');',zaxis_variablename);
+    eval(cmd);
+    cmd = sprintf('seq_num = table_temp.%s;',seq_num_variablename);
+    eval(cmd);
+    cmd = sprintf('img_count = table_temp.%s;',img_count_variablename);
     eval(cmd);
     MasterFN = sprintf('%s_master.h5',masterfilepattern{1});
     exp_pos_rbv_z_x = [zpos,xpos];
@@ -83,6 +91,8 @@ function output = get_exp_cond_bluesky(exp_cond_record_fp)
     exp_pos_cen = [z_direction_modification*exp_pos_rbv_z_cen,x_direction_modification*exp_pos_rbv_x_cen];
     output.exp_pos = exp_pos*1E-6; % convert from um to m
     output.exp_pos_cen = exp_pos_cen*1E-6; % convert from um to m
+    output.seq_num = seq_num; % the sequency number of a scan from bluesky
+    output.img_count = img_count; % the correspounding fraome number in h5 file of a scan from bluesky, important when suspension is enabled. When suspension is triggered, the scan will "redo" previos scan porcess again, and the seq_num and the eig_img_count are different.
     [output.n_of_data, ~] = size(exp_pos);
     output.MasterFN = MasterFN;
     output.z_direction_modification = z_direction_modification;
@@ -108,9 +118,12 @@ function init_cond = get_config(config_tables)
     init_cond.master_fp = fullfile(buffer.folder,buffer.name);
     init_cond.exp_pos = temp.exp_pos;
     init_cond.exp_pos_cen = temp.exp_pos_cen;
+    init_cond.seq_num = temp.seq_num; % for the frame lose when suspension function enalbe in bluesky
+    init_cond.img_count = temp.img_count; % for the frame lose when suspension function enalbe in bluesky
     init_cond.n_of_data = temp.n_of_data;
     init_cond.x_direction_modification = temp.x_direction_modification;
     init_cond.z_direction_modification = temp.z_direction_modification;
+    
     
 
     % get mask file name and file path

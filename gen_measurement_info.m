@@ -1,6 +1,6 @@
 function measurement_info = gen_measurement_info(init_cond,mask_info)
 
-    fprintf('Analyzing data structure...\t')
+    %fprintf('Analyzing data structure...\t') %20250807, replaced by EigerDatafunc, remove after 20260101
 
     bad_data_sn = [];
 
@@ -8,6 +8,8 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     data_file_path = fileparts(master_fp);
     effective_mask = mask_info.effective_mask;
 
+    %{
+    %20250807, replaced by EigerDatafunc, remove after 20260101
     info = h5info(master_fp);
     [n_of_link,~] = size(info.Groups.Groups(1).Links);
 
@@ -21,10 +23,12 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     end
 
     fprintf('Done.\n');
+    %20250807, replaced by EigerDatafunc, remove after 20260101
+    %}
     
-    link_file_list = cell(n_of_link,1);
-    link_object_list = cell(n_of_link,1);
-    link_index = cell(n_of_link,1);
+    %link_file_list = cell(n_of_link,1); %20250807, replaced by EigerDatafunc, remove after 20260101
+    %link_object_list = cell(n_of_link,1); %20250807, replaced by EigerDatafunc, remove after 20260101
+    % link_index = cell(n_of_link,1); %20250807, replaced by EigerDatafunc, remove after 20260101
     fprintf('Data preparation in progressing...\n');
     n_of_data = init_cond.n_of_data;
     measured_amp = cell(n_of_data,1);
@@ -35,10 +39,12 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
 
     rawdata_clip_size = init_cond.rawdata_clip_size;
     data_clip_row_start_idx = init_cond.beam_center_y - (rawdata_clip_size-1)/2;
-    %data_clip_row_end_idx = init_cond.beam_center_y + (rawdata_clip_size-1)/2;
+    data_clip_row_end_idx = init_cond.beam_center_y + (rawdata_clip_size-1)/2;
     data_clip_col_start_idx = init_cond.beam_center_x - (rawdata_clip_size-1)/2;
-    %data_clip_col_end_idx = init_cond.beam_center_x + (rawdata_clip_size-1)/2;
+    data_clip_col_end_idx = init_cond.beam_center_x + (rawdata_clip_size-1)/2;
     
+    %{
+    %20250807, replaced by EigerDatafunc, remove after 20260101
     for i = 1:n_of_link
         link_file_list{i} = fullfile(data_file_path, info.Groups.Groups(1).Links(i).Value{1});
         link_object_list{i} = info.Groups.Groups(1).Links(i).Value{2};
@@ -62,7 +68,15 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
             end
         end
         data = single( transpose( h5read( target_fn, link_object_list{target_file_sn},[data_clip_col_start_idx,data_clip_row_start_idx, i - link_index{target_file_sn}(1) + 1],[rawdata_clip_size,rawdata_clip_size,1]) ) );
-        
+        %20250807, replaced by EigerDatafunc, remove after 20260101
+        %}
+    master_info = EigerDataFunc.ReadEigerHDF5Master(init_cond.master_fp);
+    for seq_num = 1:n_of_data
+        if mod(seq_num,20) == 0 || seq_num == n_of_data
+            fprintf('Data Sheet %d/%d...\n',seq_num,n_of_data); % show the progress
+        end
+        frame_sn = init_cond.img_count(init_cond.seq_num(seq_num)); % for the frame lose when suspension function enalbe in bluesky
+        data = single(EigerDataFunc.ReadEigerHDF5Data(master_info,frame_sn,[data_clip_col_start_idx,data_clip_col_end_idx],[data_clip_row_start_idx,data_clip_row_end_idx]));
         
         effective_clip_size = init_cond.effective_clip_size;
         if init_cond.probe_extending_factor ~= 1
@@ -80,20 +94,20 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
             %mfig_ysize = GUIh.MF.mfig.Position(4);
             %GUIh.Alarm.mfig.Position = [mfig_xstart + mfig_xsize/2, mfig_ystart + mfig_ysize/2, GUIh.Alarm.mfig.Position(3), GUIh.Alarm.mfig.Position(4)];
             % GUIh.Alarm.mfig.Visible = 'On';
-            fprintf('!!!!!     Saturation point detected on #%d    !!!!!\n',i);
+            fprintf('!!!!!     Saturation point detected on #%d    !!!!!\n',seq_num);
             fprintf('Value = %d',max(data,[],'all'));
-            bad_data_sn = [bad_data_sn i];
+            bad_data_sn = [bad_data_sn seq_num];
             % data(data >= GUIh.IterCtrl.PrepDataDeadPThres_editfield.Value) = 0;
-            bad_data_mask{i} = data >= 1E7;
-            data = data.*~bad_data_mask{i};
-            individual_mask{i} = or(effective_mask,bad_data_mask{i});
+            bad_data_mask{seq_num} = data >= 1E7;
+            data = data.*~bad_data_mask{seq_num};
+            individual_mask{seq_num} = or(effective_mask,bad_data_mask{seq_num});
         else
-            individual_mask{i} = effective_mask;
+            individual_mask{seq_num} = effective_mask;
         end
-        individual_mask_active_area(i) = sum(~individual_mask{i},'all');
-        
-        measured_amp{i} = sqrt(data);
-        measured_amp_max(i,1) = max(measured_amp{i},[],'all');
+        individual_mask_active_area(seq_num) = sum(~individual_mask{seq_num},'all');
+
+        measured_amp{seq_num} = sqrt(data);
+        measured_amp_max(seq_num,1) = max(measured_amp{seq_num},[],'all');
         %GUIh.PlotArea.DataSn_editfield.Value = i;
         %imagesc(GUIh.PlotArea.Data_axes,measured_amp{i},[0,measured_amp_max(i,1)]);
         %title(GUIh.PlotArea.Data_axes,sprintf('Raw data max. = %.1f',max(data,[],'all')))
@@ -102,8 +116,8 @@ function measurement_info = gen_measurement_info(init_cond,mask_info)
     end
     
     % convert cell to matrix for speedup when GPU applied
-    measured_amp_temp = zeros(effective_clip_size,effective_clip_size,numel(measured_amp));
-    individual_mask_temp = false(effective_clip_size,effective_clip_size,numel(individual_mask));
+    measured_amp_temp = zeros(effective_clip_size,effective_clip_size,init_cond.n_of_data);
+    individual_mask_temp = false(effective_clip_size,effective_clip_size,init_cond.n_of_data);
     for SN = 1:numel(measured_amp)
         measured_amp_temp(:,:,SN) = measured_amp{SN};
         individual_mask_temp(:,:,SN) = individual_mask{SN};
